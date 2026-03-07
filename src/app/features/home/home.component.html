@@ -1,0 +1,206 @@
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Left: Logo -->
+    <div class="navbar-brand" (click)="scrollToSection('home')">
+      <div class="logo-icon">
+        <i class="fas fa-clipboard-check"></i>
+      </div>
+      <span class="brand-name">GrievEase</span>
+    </div>
+
+    <!-- Center: Navigation Links -->
+    <div class="navbar-links">
+      <a (click)="scrollToSection('home')" class="nav-link">Home</a>
+      <a (click)="scrollToSection('about')" class="nav-link">About</a>
+      <a (click)="scrollToSection('how-it-works')" class="nav-link">How It Works</a>
+      <a (click)="scrollToSection('features')" class="nav-link">Features</a>
+      <a (click)="navigateToDashboard()" class="nav-link">Dashboard</a>
+    </div>
+
+    <!-- Right: Auth Buttons -->
+    <div class="navbar-actions">
+      <button class="btn-nav btn-login" (click)="navigateToLogin()">
+        Login
+      </button>
+      <button class="btn-nav btn-signup" (click)="navigateToSignup()">
+        Sign Up
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section" id="home">
+  <div class="hero-background">
+    <div class="hero-pattern"></div>
+  </div>
+  <div class="hero-content">
+    <h1 class="hero-title animate-fade-in">Transform Grievances into Solutions</h1>
+    <p class="hero-subtitle animate-fade-in-delayed">
+      Empower your community with GrievEase — where concerns meet collaborative solutions. 
+      Together, let's build a better tomorrow.
+    </p>
+    <div class="hero-buttons animate-slide-up">
+      <button class="btn btn-primary" (click)="navigateToSignup()">
+        <i class="fas fa-rocket"></i>
+        Get Started Free
+      </button>
+      <button class="btn btn-secondary" (click)="scrollToSection('how-it-works')">
+        <i class="fas fa-play-circle"></i>
+        Learn More
+      </button>
+    </div>
+  </div>
+
+  <!-- Scroll Indicator -->
+  <div class="scroll-indicator" (click)="scrollToSection('statistics')">
+    <i class="fas fa-chevron-down"></i>
+  </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="statistics-section" id="statistics">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card" *ngFor="let stat of statistics">
+        <div class="stat-icon">
+          <i class="fas {{ stat.icon }}"></i>
+        </div>
+        <div class="stat-value">{{ stat.value }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section" id="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Our Process</span>
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-subtitle">
+        Simple, transparent, and effective grievance resolution in three steps
+      </p>
+    </div>
+
+    <div class="steps-container">
+      <div class="step-card" *ngFor="let step of steps; let i = index">
+        <div class="step-number-badge">{{ step.number }}</div>
+        <div class="step-icon">
+          <i class="fas {{ step.icon }}"></i>
+        </div>
+        <h3 class="step-title">{{ step.title }}</h3>
+        <p class="step-description">{{ step.description }}</p>
+        <div class="step-connector" *ngIf="i < steps.length - 1">
+          <i class="fas fa-arrow-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-badge">Why Choose Us</span>
+      <h2 class="section-title">Why Choose GrievEase?</h2>
+      <p class="section-subtitle">
+        A comprehensive platform designed for the community, by the community
+      </p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card" *ngFor="let feature of features">
+        <div class="feature-icon">
+          <i class="fas {{ feature.icon }}"></i>
+        </div>
+        <h3 class="feature-title">{{ feature.title }}</h3>
+        <p class="feature-description">{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title">Ready to Make a Difference?</h2>
+      <p class="cta-subtitle">
+        Join thousands of community members making their voices heard and driving positive change
+      </p>
+      <button class="btn btn-cta" (click)="navigateToSignup()">
+        <i class="fas fa-user-plus"></i>
+        Sign Up Now
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer" id="about">
+  <div class="container">
+    <div class="footer-content">
+      <!-- Brand Column -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="brand-name">GrievEase</span>
+        </div>
+        <p class="footer-description">
+          Empowering communities through transparent, effective, and accountable grievance management. 
+          Because your voice matters.
+        </p>
+        <div class="social-links">
+          <a *ngFor="let social of socialLinks" 
+             [href]="social.url" 
+             target="_blank" 
+             class="social-link"
+             [attr.aria-label]="social.label">
+            <i class="fab {{ social.icon }}"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Links Columns -->
+      <div class="footer-column">
+        <h4 class="footer-heading">About</h4>
+        <ul class="footer-list">
+          <li *ngFor="let link of footerLinks.about">
+            <a [href]="link.link">{{ link.label }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Support</h4>
+        <ul class="footer-list">
+          <li *ngFor="let link of footerLinks.support">
+            <a [href]="link.link">{{ link.label }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-list">
+          <li *ngFor="let link of footerLinks.legal">
+            <a [href]="link.link">{{ link.label }}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <p class="copyright">
+        © 2026 GrievEase. All rights reserved. Built with ❤️ for the community.
+      </p>
+    </div>
+  </div>
+</footer>
