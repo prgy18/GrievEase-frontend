@@ -1,0 +1,345 @@
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Left: Logo -->
+    <div class="navbar-brand" (click)="navigateToHome()">
+      <div class="logo-icon">
+        <i class="fas fa-clipboard-check"></i>
+      </div>
+      <span class="brand-name">GrievEase</span>
+    </div>
+
+    <!-- Center: Navigation Links -->
+    <div class="navbar-links">
+      <a (click)="navigateToHome()" class="nav-link">Home</a>
+      <a (click)="navigateToAbout()" class="nav-link">About Us</a>
+      <a (click)="navigateToProcess()" class="nav-link">Process</a>
+      <a class="nav-link active">Rules</a>
+      <a href="/dashboard" class="nav-link">Dashboard</a>
+    </div>
+
+    <!-- Right: Auth Buttons -->
+    <div class="navbar-actions">
+      <button class="btn-nav btn-login" (click)="navigateToHome()">
+        Login
+      </button>
+      <button class="btn-nav btn-signup" (click)="navigateToSignup()">
+        Sign Up
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="rules-hero">
+  <div class="hero-background">
+    <div class="hero-pattern"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">COMMUNITY GUIDELINES</div>
+    <h1 class="hero-title">Rules & Guidelines</h1>
+    <p class="hero-subtitle">
+      These guidelines ensure a respectful, transparent, and effective platform for everyone. 
+      By using GrievEase, you agree to follow these community standards.
+    </p>
+  </div>
+</section>
+
+<!-- Quick Navigation -->
+<section class="quick-nav-section">
+  <div class="container">
+    <div class="quick-nav-grid">
+      <div class="quick-nav-card" (click)="scrollToSection('guidelines')">
+        <i class="fas fa-book"></i>
+        <span>Guidelines</span>
+      </div>
+      <div class="quick-nav-card" (click)="scrollToSection('prohibited')">
+        <i class="fas fa-ban"></i>
+        <span>Prohibited</span>
+      </div>
+      <div class="quick-nav-card" (click)="scrollToSection('best-practices')">
+        <i class="fas fa-star"></i>
+        <span>Best Practices</span>
+      </div>
+      <div class="quick-nav-card" (click)="scrollToSection('moderation')">
+        <i class="fas fa-gavel"></i>
+        <span>Moderation</span>
+      </div>
+      <div class="quick-nav-card" (click)="scrollToSection('rights')">
+        <i class="fas fa-balance-scale"></i>
+        <span>Your Rights</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Community Guidelines Section -->
+<section class="guidelines-section" id="guidelines">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Community Guidelines</h2>
+      <p class="section-subtitle">
+        Core principles that govern our community and ensure a positive experience for all
+      </p>
+    </div>
+
+    <div class="guidelines-grid">
+      <div class="guideline-card" *ngFor="let guideline of guidelines">
+        <div class="guideline-icon">
+          <i class="fas {{ guideline.icon }}"></i>
+        </div>
+        <h3 class="guideline-title">{{ guideline.title }}</h3>
+        <p class="guideline-description">{{ guideline.description }}</p>
+        <ul class="guideline-rules">
+          <li *ngFor="let rule of guideline.rules">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ rule }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Prohibited Content Section -->
+<section class="prohibited-section" id="prohibited">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Prohibited Content</h2>
+      <p class="section-subtitle">
+        The following types of content are strictly prohibited on our platform
+      </p>
+    </div>
+
+    <div class="prohibited-grid">
+      <div class="prohibited-card" *ngFor="let item of prohibitedContent">
+        <div class="prohibited-icon">
+          <i class="fas {{ item.icon }}"></i>
+        </div>
+        <h4 class="prohibited-title">{{ item.title }}</h4>
+        <p class="prohibited-description">{{ item.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Best Practices Section -->
+<section class="best-practices-section" id="best-practices">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Grievance Filing Best Practices</h2>
+      <p class="section-subtitle">
+        Follow these steps to ensure your grievance is processed quickly and effectively
+      </p>
+    </div>
+
+    <div class="best-practices-list">
+      <div class="practice-item" *ngFor="let practice of bestPractices">
+        <div class="practice-number">{{ practice.step }}</div>
+        <div class="practice-icon">
+          <i class="fas {{ practice.icon }}"></i>
+        </div>
+        <div class="practice-content">
+          <h4 class="practice-title">{{ practice.title }}</h4>
+          <p class="practice-description">{{ practice.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Acceptable Categories Section -->
+<section class="categories-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Acceptable Issue Categories</h2>
+      <p class="section-subtitle">
+        You can report grievances in the following categories
+      </p>
+    </div>
+
+    <div class="issue-categories-grid">
+      <div class="issue-category-card" *ngFor="let category of issueCategories">
+        <i class="fas {{ category.icon }}"></i>
+        <span>{{ category.name }}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Moderation Policy Section -->
+<section class="moderation-section" id="moderation">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Moderation Policy</h2>
+      <p class="section-subtitle">
+        How we maintain platform integrity and ensure guideline compliance
+      </p>
+    </div>
+
+    <div class="moderation-grid">
+      <div class="moderation-card" *ngFor="let policy of moderationPolicies">
+        <div class="moderation-icon">
+          <i class="fas {{ policy.icon }}"></i>
+        </div>
+        <h4 class="moderation-title">{{ policy.title }}</h4>
+        <p class="moderation-description">{{ policy.description }}</p>
+      </div>
+    </div>
+
+    <div class="moderation-notice">
+      <i class="fas fa-info-circle"></i>
+      <p>
+        <strong>Note:</strong> We reserve the right to modify these guidelines at any time. 
+        Continued use of the platform constitutes acceptance of any changes.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Rights & Responsibilities Section -->
+<section class="rights-section" id="rights">
+  <div class="container">
+    <div class="rights-grid">
+      <!-- User Rights -->
+      <div class="rights-card">
+        <div class="rights-header">
+          <div class="rights-icon user-rights-icon">
+            <i class="fas fa-user-shield"></i>
+          </div>
+          <h3 class="rights-title">Your Rights as a User</h3>
+        </div>
+        <ul class="rights-list">
+          <li *ngFor="let right of userRights">
+            <i class="fas fa-check"></i>
+            <span>{{ right }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Official Responsibilities -->
+      <div class="rights-card">
+        <div class="rights-header">
+          <div class="rights-icon official-rights-icon">
+            <i class="fas fa-user-tie"></i>
+          </div>
+          <h3 class="rights-title">Government Official Responsibilities</h3>
+        </div>
+        <ul class="rights-list">
+          <li *ngFor="let responsibility of officialResponsibilities">
+            <i class="fas fa-check"></i>
+            <span>{{ responsibility }}</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Terms Acceptance Section -->
+<section class="terms-section">
+  <div class="container">
+    <div class="terms-box">
+      <div class="terms-icon">
+        <i class="fas fa-file-contract"></i>
+      </div>
+      <div class="terms-content">
+        <h3 class="terms-title">Acceptance of Terms</h3>
+        <p class="terms-text">
+          By creating an account and using GrievEase, you acknowledge that you have read, 
+          understood, and agree to abide by these community guidelines and rules. 
+          Violation of these terms may result in account suspension or termination.
+        </p>
+        <p class="terms-text">
+          <strong>Last Updated:</strong> March 10, 2026
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="rules-cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title">Ready to Get Started?</h2>
+      <p class="cta-subtitle">
+        Join our community of responsible citizens working together to build better neighborhoods.
+      </p>
+      <button class="btn btn-cta" (click)="navigateToSignup()">
+        Create Your Account
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <!-- Brand Column -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="brand-name">GrievEase</span>
+        </div>
+        <p class="footer-description">
+          Empowering communities through transparent, effective, and accountable grievance management. 
+          Because your voice matters.
+        </p>
+        <div class="social-links">
+          <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+            <i class="fab fa-github"></i>
+          </a>
+          <a href="https://twitter.com" target="_blank" class="social-link" aria-label="Twitter">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="https://linkedin.com" target="_blank" class="social-link" aria-label="LinkedIn">
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a href="mailto:contact@grievease.com" class="social-link" aria-label="Email">
+            <i class="fas fa-envelope"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Links Columns -->
+      <div class="footer-column">
+        <h4 class="footer-heading">About</h4>
+        <ul class="footer-list">
+          <li><a (click)="navigateToAbout()">About Us</a></li>
+          <li><a (click)="navigateToProcess()">How It Works</a></li>
+          <li><a (click)="navigateToHome()">Community Guidelines</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Support</h4>
+        <ul class="footer-list">
+          <li><a href="/help">Help Center</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="/faqs">FAQs</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-list">
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/cookies">Cookie Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <p class="copyright">
+        © 2026 GrievEase. All rights reserved. Built with ❤️ for the community.
+      </p>
+    </div>
+  </div>
+</footer>

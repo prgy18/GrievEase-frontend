@@ -1,0 +1,949 @@
+/* ==================== RULES PAGE - GOVERNMENT PROFESSIONAL THEME ==================== */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@400;600;700&display=swap');
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ==================== NAVBAR ==================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #FFFFFF;
+  border-bottom: 2px solid #CBD5E0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: #0A3161;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 4px rgba(10, 49, 97, 0.15);
+  border: 1px solid #1E4D8B;
+}
+
+.brand-name {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0A3161;
+  letter-spacing: -0.3px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  font-family: 'Open Sans', sans-serif;
+  color: #1A202C;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  letter-spacing: 0.3px;
+  position: relative;
+}
+
+.nav-link.active {
+  color: #0A3161;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #0A3161;
+}
+
+.nav-link:hover {
+  color: #0A3161;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-nav {
+  font-family: 'Open Sans', sans-serif;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.btn-login {
+  background: transparent;
+  color: #0A3161;
+  border: 2px solid #0A3161;
+}
+
+.btn-login:hover {
+  background: #0A3161;
+  color: white;
+}
+
+.btn-signup {
+  background: #0A3161;
+  color: white;
+  border: 2px solid #0A3161;
+  box-shadow: 0 2px 6px rgba(10, 49, 97, 0.2);
+}
+
+.btn-signup:hover {
+  background: #1E4D8B;
+  border-color: #1E4D8B;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.25);
+}
+
+/* ==================== RULES HERO ==================== */
+.rules-hero {
+  position: relative;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0A3161 0%, #1E4D8B 100%);
+  border-bottom: 4px solid #C9A961;
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.05;
+  background-image: 
+    repeating-linear-gradient(45deg, white 0, white 10px, transparent 10px, transparent 20px);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 850px;
+  padding: 4rem 2rem;
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 0.5rem 1.5rem;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border-radius: 3px;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.hero-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.8;
+  font-weight: 400;
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+/* ==================== QUICK NAVIGATION ==================== */
+.quick-nav-section {
+  padding: 3rem 0;
+  background: white;
+  border-bottom: 1px solid #CBD5E0;
+}
+
+.quick-nav-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+}
+
+.quick-nav-card {
+  background: #F5F7FA;
+  padding: 1.75rem 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid #CBD5E0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.quick-nav-card:hover {
+  border-color: #0A3161;
+  background: white;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.12);
+  transform: translateY(-2px);
+}
+
+.quick-nav-card i {
+  font-size: 1.75rem;
+  color: #0A3161;
+}
+
+.quick-nav-card span {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.925rem;
+  color: #4A5568;
+}
+
+/* ==================== SECTION HEADERS ==================== */
+.section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: #0A3161;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.section-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.125rem;
+  color: #4A5568;
+  max-width: 750px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+/* ==================== GUIDELINES SECTION ==================== */
+.guidelines-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.guidelines-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem;
+}
+
+.guideline-card {
+  background: #F5F7FA;
+  padding: 2.5rem 2.25rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border: 2px solid #CBD5E0;
+}
+
+.guideline-card:hover {
+  border-color: #0A3161;
+  box-shadow: 0 8px 24px rgba(10, 49, 97, 0.12);
+  transform: translateY(-4px);
+  background: white;
+}
+
+.guideline-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #0A3161, #1E4D8B);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.75rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.2);
+}
+
+.guideline-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #0A3161;
+  margin-bottom: 1rem;
+}
+
+.guideline-description {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+  color: #4A5568;
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+}
+
+.guideline-rules {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.guideline-rules li {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.925rem;
+  color: #4A5568;
+  margin-bottom: 0.875rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.guideline-rules li i {
+  color: #2E7D32;
+  font-size: 1rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+/* ==================== PROHIBITED SECTION ==================== */
+.prohibited-section {
+  padding: 6rem 0;
+  background: #F5F7FA;
+}
+
+.prohibited-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.prohibited-card {
+  background: white;
+  padding: 2.25rem 2rem;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 2px solid #E53E3E;
+  border-left-width: 6px;
+}
+
+.prohibited-card:hover {
+  box-shadow: 0 8px 24px rgba(229, 62, 62, 0.15);
+  transform: translateY(-4px);
+}
+
+.prohibited-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(229, 62, 62, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: #E53E3E;
+  font-size: 1.75rem;
+}
+
+.prohibited-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0A3161;
+  margin-bottom: 0.75rem;
+}
+
+.prohibited-description {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.925rem;
+  color: #4A5568;
+  line-height: 1.7;
+}
+
+/* ==================== BEST PRACTICES ==================== */
+.best-practices-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.best-practices-list {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.practice-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  background: #F5F7FA;
+  padding: 2.25rem 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+  border: 2px solid #CBD5E0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.practice-item:hover {
+  border-color: #0A3161;
+  box-shadow: 0 6px 20px rgba(10, 49, 97, 0.1);
+  background: white;
+}
+
+.practice-number {
+  position: absolute;
+  top: -16px;
+  left: 2rem;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #0A3161, #1E4D8B);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Merriweather', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.3);
+  border: 4px solid white;
+}
+
+.practice-icon {
+  width: 60px;
+  height: 60px;
+  background: white;
+  border: 2px solid #CBD5E0;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0A3161;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.5rem;
+}
+
+.practice-content {
+  flex: 1;
+  padding-top: 0.5rem;
+}
+
+.practice-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0A3161;
+  margin-bottom: 0.75rem;
+}
+
+.practice-description {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+  color: #4A5568;
+  line-height: 1.8;
+}
+
+/* ==================== ISSUE CATEGORIES ==================== */
+.categories-section {
+  padding: 6rem 0;
+  background: #F5F7FA;
+}
+
+.issue-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.issue-category-card {
+  background: white;
+  padding: 1.75rem 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid #CBD5E0;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.issue-category-card:hover {
+  border-color: #0A3161;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.12);
+  transform: translateY(-2px);
+}
+
+.issue-category-card i {
+  font-size: 2rem;
+  color: #0A3161;
+}
+
+.issue-category-card span {
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #4A5568;
+}
+
+/* ==================== MODERATION SECTION ==================== */
+.moderation-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.moderation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.moderation-card {
+  background: #F5F7FA;
+  padding: 2.25rem 2rem;
+  border-radius: 8px;
+  border: 2px solid #CBD5E0;
+  transition: all 0.2s ease;
+}
+
+.moderation-card:hover {
+  border-color: #0A3161;
+  box-shadow: 0 6px 20px rgba(10, 49, 97, 0.1);
+  background: white;
+}
+
+.moderation-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, rgba(10, 49, 97, 0.1), rgba(30, 77, 139, 0.1));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  color: #0A3161;
+  font-size: 1.5rem;
+}
+
+.moderation-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0A3161;
+  margin-bottom: 0.75rem;
+}
+
+.moderation-description {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.975rem;
+  color: #4A5568;
+  line-height: 1.75;
+}
+
+.moderation-notice {
+  background: #FEF3C7;
+  border: 2px solid #F59E0B;
+  border-left-width: 6px;
+  border-radius: 8px;
+  padding: 1.75rem 2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+}
+
+.moderation-notice i {
+  font-size: 1.5rem;
+  color: #F59E0B;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.moderation-notice p {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.975rem;
+  color: #78350F;
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* ==================== RIGHTS SECTION ==================== */
+.rights-section {
+  padding: 6rem 0;
+  background: #F5F7FA;
+}
+
+.rights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem;
+}
+
+.rights-card {
+  background: white;
+  padding: 2.5rem 2.25rem;
+  border-radius: 8px;
+  border: 2px solid #CBD5E0;
+}
+
+.rights-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.rights-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: white;
+  font-size: 2rem;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.2);
+}
+
+.user-rights-icon {
+  background: linear-gradient(135deg, #0A3161, #1E4D8B);
+}
+
+.official-rights-icon {
+  background: linear-gradient(135deg, #2E7D32, #1E4D8B);
+}
+
+.rights-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #0A3161;
+}
+
+.rights-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rights-list li {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.975rem;
+  color: #4A5568;
+  margin-bottom: 1.125rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding-left: 0.5rem;
+}
+
+.rights-list li i {
+  color: #2E7D32;
+  font-size: 1.125rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+/* ==================== TERMS SECTION ==================== */
+.terms-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.terms-box {
+  background: linear-gradient(135deg, #F5F7FA, #E8EDF3);
+  border: 2px solid #0A3161;
+  border-radius: 8px;
+  padding: 3rem 2.5rem;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.terms-icon {
+  width: 72px;
+  height: 72px;
+  background: #0A3161;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.3);
+}
+
+.terms-content {
+  flex: 1;
+}
+
+.terms-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0A3161;
+  margin-bottom: 1.25rem;
+}
+
+.terms-text {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+  color: #4A5568;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+.terms-text:last-child {
+  margin-bottom: 0;
+}
+
+/* ==================== RULES CTA ==================== */
+.rules-cta-section {
+  padding: 6rem 0;
+  background: linear-gradient(135deg, #0A3161, #1E4D8B);
+  border-top: 4px solid #C9A961;
+}
+
+.cta-content {
+  text-align: center;
+  color: white;
+}
+
+.cta-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.cta-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 2.75rem;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.75;
+}
+
+.btn {
+  font-family: 'Open Sans', sans-serif;
+  padding: 1.25rem 3rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+}
+
+.btn-cta {
+  background: white;
+  color: #0A3161;
+  border: 2px solid white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cta:hover {
+  background: #C9A961;
+  color: #0A3161;
+  border-color: #C9A961;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== FOOTER ==================== */
+.footer {
+  background: #0A2540;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 4.5rem 0 2.5rem;
+  border-top: 4px solid #C9A961;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3.5rem;
+  margin-bottom: 3rem;
+}
+
+.footer-brand .footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.footer-brand .logo-icon {
+  background: white;
+  color: #0A3161;
+}
+
+.footer-brand .brand-name {
+  color: white;
+}
+
+.footer-description {
+  font-family: 'Open Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.8;
+  margin-bottom: 1.75rem;
+  font-size: 0.95rem;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-link {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.social-link:hover {
+  background: white;
+  color: #0A3161;
+  border-color: white;
+}
+
+.footer-heading {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.075rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-list li {
+  margin-bottom: 0.875rem;
+}
+
+.footer-list a {
+  font-family: 'Open Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-size: 0.925rem;
+  cursor: pointer;
+}
+
+.footer-list a:hover {
+  color: white;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 2.25rem;
+  text-align: center;
+}
+
+.copyright {
+  font-family: 'Open Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 1024px) {
+  .navbar-links { display: none; }
+  .quick-nav-grid { grid-template-columns: repeat(3, 1fr); }
+  .guidelines-grid { grid-template-columns: 1fr; }
+  .prohibited-grid { grid-template-columns: repeat(2, 1fr); }
+  .issue-categories-grid { grid-template-columns: repeat(2, 1fr); }
+  .moderation-grid { grid-template-columns: 1fr; }
+  .rights-grid { grid-template-columns: 1fr; }
+  .footer-content { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .hero-title { font-size: 2.5rem; }
+  .hero-subtitle { font-size: 1.075rem; }
+  .section-title { font-size: 2rem; }
+  .cta-title { font-size: 2rem; }
+  .quick-nav-grid { grid-template-columns: 1fr; }
+  .prohibited-grid { grid-template-columns: 1fr; }
+  .issue-categories-grid { grid-template-columns: 1fr; }
+  .practice-item { flex-direction: column; gap: 1rem; }
+  .terms-box { flex-direction: column; }
+}

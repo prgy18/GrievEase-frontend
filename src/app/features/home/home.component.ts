@@ -110,6 +110,9 @@ export class HomeComponent {
   navigateToDashboard(): void {
     this.router.navigate(['/grievances']);
   }
+  navigateToRules(): void {
+    this.router.navigate(['rules']);
+  }
 
   scrollToSection(sectionId: string): void {
     const element = document.getElementById(sectionId);
