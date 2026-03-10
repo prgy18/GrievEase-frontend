@@ -1,0 +1,653 @@
+/* ==================== ABOUT US PAGE - GOVERNMENT PROFESSIONAL THEME ==================== */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Open+Sans:wght@400;600;700&display=swap');
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ==================== NAVBAR (SAME AS HOME) ==================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #FFFFFF;
+  border-bottom: 2px solid #CBD5E0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  background: #0A3161;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 4px rgba(10, 49, 97, 0.15);
+  border: 1px solid #1E4D8B;
+}
+
+.brand-name {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0A3161;
+  letter-spacing: -0.3px;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+.nav-link {
+  font-family: 'Open Sans', sans-serif;
+  color: #1A202C;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  letter-spacing: 0.3px;
+  position: relative;
+}
+
+.nav-link.active {
+  color: #0A3161;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #0A3161;
+}
+
+.nav-link:hover {
+  color: #0A3161;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.btn-nav {
+  font-family: 'Open Sans', sans-serif;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.btn-login {
+  background: transparent;
+  color: #0A3161;
+  border: 2px solid #0A3161;
+}
+
+.btn-login:hover {
+  background: #0A3161;
+  color: white;
+}
+
+.btn-signup {
+  background: #0A3161;
+  color: white;
+  border: 2px solid #0A3161;
+  box-shadow: 0 2px 6px rgba(10, 49, 97, 0.2);
+}
+
+.btn-signup:hover {
+  background: #1E4D8B;
+  border-color: #1E4D8B;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.25);
+}
+
+/* ==================== ABOUT HERO SECTION ==================== */
+.about-hero {
+  position: relative;
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0A3161 0%, #1E4D8B 100%);
+  border-bottom: 4px solid #C9A961;
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hero-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.05;
+  background-image: 
+    radial-gradient(circle, white 2px, transparent 2px);
+  background-size: 40px 40px;
+  animation: patternMove 30s linear infinite;
+}
+
+@keyframes patternMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 40px 40px;
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 800px;
+  padding: 4rem 2rem;
+}
+
+.hero-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.hero-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+/* ==================== MISSION SECTION ==================== */
+.mission-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: #0A3161;
+  margin-bottom: 1rem;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.section-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.125rem;
+  color: #4A5568;
+  max-width: 750px;
+  margin: 0 auto;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.mission-content {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.mission-text {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.125rem;
+  color: #4A5568;
+  line-height: 1.9;
+  margin-bottom: 1.75rem;
+}
+
+/* ==================== VISION SECTION ==================== */
+.vision-section {
+  padding: 6rem 0;
+  background: #F5F7FA;
+}
+
+.vision-points {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.vision-point {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid #CBD5E0;
+  transition: all 0.2s ease;
+}
+
+.vision-point:hover {
+  border-color: #0A3161;
+  box-shadow: 0 8px 24px rgba(10, 49, 97, 0.12);
+  transform: translateY(-4px);
+}
+
+.vision-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #0A3161, #1E4D8B);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.75rem;
+  color: white;
+  font-size: 1.75rem;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.2);
+}
+
+.vision-text {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+  color: #4A5568;
+  line-height: 1.7;
+  font-weight: 600;
+}
+
+/* ==================== WHAT MAKES US DIFFERENT ==================== */
+.different-section {
+  padding: 6rem 0;
+  background: white;
+}
+
+.differentiators-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2.5rem;
+}
+
+.diff-card {
+  background: #F5F7FA;
+  padding: 2.5rem 2.25rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.diff-card:hover {
+  border-color: #0A3161;
+  box-shadow: 0 8px 24px rgba(10, 49, 97, 0.12);
+  transform: translateY(-4px);
+  background: white;
+}
+
+.diff-icon-wrapper {
+  margin-bottom: 1.75rem;
+}
+
+.diff-icon {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, rgba(10, 49, 97, 0.1), rgba(30, 77, 139, 0.1));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0A3161;
+  font-size: 1.875rem;
+  border: 2px solid rgba(10, 49, 97, 0.15);
+}
+
+.diff-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #0A3161;
+  margin-bottom: 1rem;
+}
+
+.diff-description {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.975rem;
+  color: #4A5568;
+  line-height: 1.75;
+}
+
+/* ==================== IMPACT SECTION ==================== */
+.impact-section {
+  padding: 6rem 0;
+  background: #F5F7FA;
+}
+
+.impact-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+
+.impact-stat-card {
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 8px;
+  text-align: center;
+  transition: all 0.2s ease;
+  border: 2px solid #CBD5E0;
+  position: relative;
+  overflow: hidden;
+}
+
+.impact-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #0A3161, #1E4D8B);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.impact-stat-card:hover {
+  border-color: #0A3161;
+  box-shadow: 0 8px 24px rgba(10, 49, 97, 0.12);
+  transform: translateY(-4px);
+}
+
+.impact-stat-card:hover::before {
+  transform: scaleX(1);
+}
+
+.impact-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, rgba(10, 49, 97, 0.1), rgba(30, 77, 139, 0.1));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: #0A3161;
+  font-size: 1.75rem;
+}
+
+.impact-value {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: #0A3161;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.impact-label {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #4A5568;
+  font-weight: 600;
+}
+
+/* ==================== ABOUT CTA SECTION ==================== */
+.about-cta-section {
+  padding: 6rem 0;
+  background: linear-gradient(135deg, #0A3161, #1E4D8B);
+  position: relative;
+  overflow: hidden;
+  border-top: 4px solid #C9A961;
+}
+
+.cta-content {
+  text-align: center;
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-title {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 2.75rem;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.cta-subtitle {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 2.75rem;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.75;
+}
+
+.btn {
+  font-family: 'Open Sans', sans-serif;
+  padding: 1.25rem 3rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+}
+
+.btn-cta {
+  background: white;
+  color: #0A3161;
+  border: 2px solid white;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cta:hover {
+  background: #C9A961;
+  color: #0A3161;
+  border-color: #C9A961;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* ==================== FOOTER (SAME AS HOME) ==================== */
+.footer {
+  background: #0A2540;
+  color: rgba(255, 255, 255, 0.9);
+  padding: 4.5rem 0 2.5rem;
+  border-top: 4px solid #C9A961;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3.5rem;
+  margin-bottom: 3rem;
+}
+
+.footer-brand .footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.footer-brand .logo-icon {
+  background: white;
+  color: #0A3161;
+}
+
+.footer-brand .brand-name {
+  color: white;
+}
+
+.footer-description {
+  font-family: 'Open Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.8;
+  margin-bottom: 1.75rem;
+  font-size: 0.95rem;
+}
+
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-link {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.social-link:hover {
+  background: white;
+  color: #0A3161;
+  border-color: white;
+}
+
+.footer-heading {
+  font-family: 'Merriweather', Georgia, serif;
+  font-size: 1.075rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.footer-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-list li {
+  margin-bottom: 0.875rem;
+}
+
+.footer-list a {
+  font-family: 'Open Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-size: 0.925rem;
+  cursor: pointer;
+}
+
+.footer-list a:hover {
+  color: white;
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 2.25rem;
+  text-align: center;
+}
+
+.copyright {
+  font-family: 'Open Sans', sans-serif;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+@media (max-width: 1024px) {
+  .navbar-links {
+    display: none;
+  }
+
+  .vision-points {
+    grid-template-columns: 1fr;
+  }
+
+  .differentiators-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .impact-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.075rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+
+  .cta-title {
+    font-size: 2rem;
+  }
+
+  .impact-stats {
+    grid-template-columns: 1fr;
+  }
+}

@@ -93,7 +93,9 @@ export class HomeComponent {
   ];
 
   constructor(private router: Router) {}
-
+  navigateToAbout(): void {
+  this.router.navigate(['/about']);
+}
   navigateToSignup(): void {
     this.router.navigate(['/auth/register']);
   }

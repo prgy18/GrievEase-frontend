@@ -1,0 +1,214 @@
+<!-- Navbar (Same as Home) -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Left: Logo -->
+    <div class="navbar-brand" (click)="navigateToHome()">
+      <div class="logo-icon">
+        <i class="fas fa-clipboard-check"></i>
+      </div>
+      <span class="brand-name">GrievEase</span>
+    </div>
+
+    <!-- Center: Navigation Links -->
+    <div class="navbar-links">
+      <a (click)="navigateToHome()" class="nav-link">Home</a>
+      <a class="nav-link active">About Us</a>
+      <a href="#how-it-works" class="nav-link">Process</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="/dashboard" class="nav-link">Dashboard</a>
+    </div>
+
+    <!-- Right: Auth Buttons -->
+    <div class="navbar-actions">
+      <button class="btn-nav btn-login" (click)="navigateToHome()">
+        Login
+      </button>
+      <button class="btn-nav btn-signup" (click)="navigateToSignup()">
+        Sign Up
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="about-hero">
+  <div class="hero-background">
+    <div class="hero-pattern"></div>
+  </div>
+  <div class="hero-content">
+    <h1 class="hero-title">About GrievEase</h1>
+    <p class="hero-subtitle">
+      Empowering communities through transparent and efficient grievance management.
+    </p>
+  </div>
+</section>
+
+<!-- Our Mission Section -->
+<section class="mission-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Our Mission</h2>
+    </div>
+    <div class="mission-content">
+      <p class="mission-text">
+        At GrievEase, we aim to revolutionize how citizens and governments collaborate. Our mission is to bring accountability, efficiency, and accessibility to public service grievance systems.
+      </p>
+      <p class="mission-text">
+        We believe that when communities and authorities communicate openly, real progress happens. Every complaint resolved is a step toward a more connected, transparent, and responsible society.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Our Vision Section -->
+<section class="vision-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Our Vision</h2>
+      <p class="section-subtitle">
+        To become the most trusted digital bridge between citizens and authorities — ensuring that every grievance, big or small, is heard, acted upon, and resolved with empathy and accountability.
+      </p>
+    </div>
+    
+    <div class="vision-points">
+      <div class="vision-point" *ngFor="let point of visionPoints">
+        <div class="vision-icon">
+          <i class="fas {{ point.icon }}"></i>
+        </div>
+        <p class="vision-text">{{ point.title }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- What Makes Us Different Section -->
+<section class="different-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">What Makes Us Different</h2>
+      <p class="section-subtitle">
+        A comprehensive platform designed for the community, by the community
+      </p>
+    </div>
+
+    <div class="differentiators-grid">
+      <div class="diff-card" *ngFor="let item of differentiators">
+        <div class="diff-icon-wrapper">
+          <div class="diff-icon">
+            <i class="fas {{ item.icon }}"></i>
+          </div>
+        </div>
+        <h3 class="diff-title">{{ item.title }}</h3>
+        <p class="diff-description">{{ item.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Our Impact Section -->
+<section class="impact-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Our Impact</h2>
+      <p class="section-subtitle">
+        Since inception, GrievEase has helped communities across multiple cities bridge the communication gap with local bodies.
+      </p>
+    </div>
+
+    <div class="impact-stats">
+      <div class="impact-stat-card" *ngFor="let stat of impactStats">
+        <div class="impact-icon">
+          <i class="fas {{ stat.icon }}"></i>
+        </div>
+        <div class="impact-value">{{ stat.value }}</div>
+        <div class="impact-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="about-cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title">Be a Part of the Change</h2>
+      <p class="cta-subtitle">
+        Join thousands of citizens already making their voices heard.
+      </p>
+      <button class="btn btn-cta" (click)="navigateToSignup()">
+        Get Started
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer (Same as Home) -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <!-- Brand Column -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="brand-name">GrievEase</span>
+        </div>
+        <p class="footer-description">
+          Empowering communities through transparent, effective, and accountable grievance management. 
+          Because your voice matters.
+        </p>
+        <div class="social-links">
+          <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+            <i class="fab fa-github"></i>
+          </a>
+          <a href="https://twitter.com" target="_blank" class="social-link" aria-label="Twitter">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="https://linkedin.com" target="_blank" class="social-link" aria-label="LinkedIn">
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a href="mailto:contact@grievease.com" class="social-link" aria-label="Email">
+            <i class="fas fa-envelope"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Links Columns -->
+      <div class="footer-column">
+        <h4 class="footer-heading">About</h4>
+        <ul class="footer-list">
+          <li><a (click)="navigateToHome()">About Us</a></li>
+          <li><a href="#how-it-works">How It Works</a></li>
+          <li><a href="/guidelines">Community Guidelines</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Support</h4>
+        <ul class="footer-list">
+          <li><a href="/help">Help Center</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="/faqs">FAQs</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-list">
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/cookies">Cookie Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <p class="copyright">
+        © 2026 GrievEase. All rights reserved. Built with ❤️ for the community.
+      </p>
+    </div>
+  </div>
+</footer>
