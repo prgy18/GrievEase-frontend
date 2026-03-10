@@ -99,6 +99,9 @@ export class HomeComponent {
   navigateToSignup(): void {
     this.router.navigate(['/auth/register']);
   }
+  navigateToProcess(): void {
+  this.router.navigate(['/process']);
+}
 
   navigateToLogin(): void {
     this.router.navigate(['/auth/login']);

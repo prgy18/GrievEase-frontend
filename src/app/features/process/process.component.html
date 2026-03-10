@@ -1,0 +1,306 @@
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Left: Logo -->
+    <div class="navbar-brand" (click)="navigateToHome()">
+      <div class="logo-icon">
+        <i class="fas fa-clipboard-check"></i>
+      </div>
+      <span class="brand-name">GrievEase</span>
+    </div>
+
+    <!-- Center: Navigation Links -->
+    <div class="navbar-links">
+      <a (click)="navigateToHome()" class="nav-link">Home</a>
+      <a (click)="navigateToAbout()" class="nav-link">About Us</a>
+      <a class="nav-link active">Process</a>
+      <a href="#features" class="nav-link">Features</a>
+      <a href="/dashboard" class="nav-link">Dashboard</a>
+    </div>
+
+    <!-- Right: Auth Buttons -->
+    <div class="navbar-actions">
+      <button class="btn-nav btn-login" (click)="navigateToHome()">
+        Login
+      </button>
+      <button class="btn-nav btn-signup" (click)="navigateToSignup()">
+        Sign Up
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="process-hero">
+  <div class="hero-background">
+    <div class="hero-pattern"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">HOW IT WORKS</div>
+    <h1 class="hero-title">Your Voice, Our Action</h1>
+    <p class="hero-subtitle">
+      A simple, transparent process that turns civic grievances into resolved issues. 
+      From submission to resolution, we've got you covered.
+    </p>
+  </div>
+</section>
+
+<!-- Main Process Steps Section -->
+<section class="main-process-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Three Simple Steps</h2>
+      <p class="section-subtitle">
+        Our streamlined process makes reporting and resolving civic issues effortless
+      </p>
+    </div>
+
+    <div class="main-steps-container">
+      <div class="main-step-card" *ngFor="let step of mainSteps; let i = index">
+        <!-- Step Number Badge -->
+        <div class="step-number-large">{{ step.number }}</div>
+
+        <!-- Step Icon -->
+        <div class="step-icon-large" [style.background]="'linear-gradient(135deg, ' + step.color + ', #1E4D8B)'">
+          <i class="fas {{ step.icon }}"></i>
+        </div>
+
+        <!-- Step Content -->
+        <h3 class="step-title-large">{{ step.title }}</h3>
+        <p class="step-description">{{ step.description }}</p>
+
+        <!-- Step Details List -->
+        <ul class="step-details-list">
+          <li *ngFor="let detail of step.details">
+            <i class="fas fa-check-circle"></i>
+            <span>{{ detail }}</span>
+          </li>
+        </ul>
+
+        <!-- Connector Arrow (not on last item) -->
+        <div class="step-arrow" *ngIf="i < mainSteps.length - 1">
+          <i class="fas fa-arrow-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Citizen Journey Section -->
+<section class="journey-section citizen-journey-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="journey-badge">
+        <i class="fas fa-user"></i>
+        For Citizens
+      </div>
+      <h2 class="section-title">Citizen Journey</h2>
+      <p class="section-subtitle">
+        How locality members report and track their grievances
+      </p>
+    </div>
+
+    <div class="journey-timeline">
+      <div class="timeline-item" *ngFor="let item of citizenJourney; let i = index">
+        <div class="timeline-connector" *ngIf="i < citizenJourney.length - 1"></div>
+        
+        <div class="timeline-icon">
+          <i class="fas {{ item.icon }}"></i>
+          <div class="timeline-number">{{ i + 1 }}</div>
+        </div>
+
+        <div class="timeline-content">
+          <h4 class="timeline-step">{{ item.step }}</h4>
+          <p class="timeline-description">{{ item.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Official Journey Section -->
+<section class="journey-section official-journey-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="journey-badge official-badge">
+        <i class="fas fa-user-tie"></i>
+        For Officials
+      </div>
+      <h2 class="section-title">Government Official Journey</h2>
+      <p class="section-subtitle">
+        How officials manage and resolve citizen grievances
+      </p>
+    </div>
+
+    <div class="journey-timeline">
+      <div class="timeline-item" *ngFor="let item of officialJourney; let i = index">
+        <div class="timeline-connector" *ngIf="i < officialJourney.length - 1"></div>
+        
+        <div class="timeline-icon official-icon">
+          <i class="fas {{ item.icon }}"></i>
+          <div class="timeline-number">{{ i + 1 }}</div>
+        </div>
+
+        <div class="timeline-content">
+          <h4 class="timeline-step">{{ item.step }}</h4>
+          <p class="timeline-description">{{ item.description }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process Features Section -->
+<section class="process-features-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Features That Power the Process</h2>
+      <p class="section-subtitle">
+        Advanced tools designed to make grievance management seamless
+      </p>
+    </div>
+
+    <div class="process-features-grid">
+      <div class="process-feature-card" *ngFor="let feature of processFeatures">
+        <div class="process-feature-icon">
+          <i class="fas {{ feature.icon }}"></i>
+        </div>
+        <h4 class="process-feature-title">{{ feature.title }}</h4>
+        <p class="process-feature-description">{{ feature.description }}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Grievance Categories</h2>
+      <p class="section-subtitle">
+        We handle a wide range of civic issues across multiple departments
+      </p>
+    </div>
+
+    <div class="categories-grid">
+      <div class="category-card" *ngFor="let category of categories">
+        <div class="category-icon" [style.background]="category.color">
+          <i class="fas {{ category.icon }}"></i>
+        </div>
+        <h4 class="category-name">{{ category.name }}</h4>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq-section">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-subtitle">
+        Everything you need to know about our grievance resolution process
+      </p>
+    </div>
+
+    <div class="faq-container">
+      <div class="faq-item" *ngFor="let faq of faqs; let i = index" [class.active]="faq.isOpen">
+        <div class="faq-question" (click)="toggleFaq(i)">
+          <h4 class="faq-question-text">{{ faq.question }}</h4>
+          <div class="faq-toggle-icon">
+            <i class="fas" [class.fa-plus]="!faq.isOpen" [class.fa-minus]="faq.isOpen"></i>
+          </div>
+        </div>
+        <div class="faq-answer" *ngIf="faq.isOpen">
+          <p>{{ faq.answer }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="process-cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="cta-title">Ready to Make a Difference?</h2>
+      <p class="cta-subtitle">
+        Join thousands of citizens already making their communities better, one grievance at a time.
+      </p>
+      <button class="btn btn-cta" (click)="navigateToSignup()">
+        Get Started Today
+        <i class="fas fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-content">
+      <!-- Brand Column -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="brand-name">GrievEase</span>
+        </div>
+        <p class="footer-description">
+          Empowering communities through transparent, effective, and accountable grievance management. 
+          Because your voice matters.
+        </p>
+        <div class="social-links">
+          <a href="https://github.com" target="_blank" class="social-link" aria-label="GitHub">
+            <i class="fab fa-github"></i>
+          </a>
+          <a href="https://twitter.com" target="_blank" class="social-link" aria-label="Twitter">
+            <i class="fab fa-twitter"></i>
+          </a>
+          <a href="https://linkedin.com" target="_blank" class="social-link" aria-label="LinkedIn">
+            <i class="fab fa-linkedin"></i>
+          </a>
+          <a href="mailto:contact@grievease.com" class="social-link" aria-label="Email">
+            <i class="fas fa-envelope"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Links Columns -->
+      <div class="footer-column">
+        <h4 class="footer-heading">About</h4>
+        <ul class="footer-list">
+          <li><a (click)="navigateToAbout()">About Us</a></li>
+          <li><a (click)="navigateToHome()">How It Works</a></li>
+          <li><a href="/guidelines">Community Guidelines</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Support</h4>
+        <ul class="footer-list">
+          <li><a href="/help">Help Center</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+          <li><a href="/faqs">FAQs</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-column">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-list">
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/cookies">Cookie Policy</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <p class="copyright">
+        © 2026 GrievEase. All rights reserved. Built with ❤️ for the community.
+      </p>
+    </div>
+  </div>
+</footer>
