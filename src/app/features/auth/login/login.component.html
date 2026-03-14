@@ -1,0 +1,198 @@
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Left: Logo -->
+    <div class="navbar-brand" (click)="navigateToHome()">
+      <div class="logo-icon">
+        <i class="fas fa-clipboard-check"></i>
+      </div>
+      <span class="brand-name">GrievEase</span>
+    </div>
+
+    <!-- Right: Back to Home -->
+    <div class="navbar-actions">
+      <button class="btn-nav btn-back" (click)="navigateToHome()">
+        <i class="fas fa-arrow-left"></i>
+        Back to Home
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Login Section -->
+<section class="login-section">
+  <div class="login-container">
+    <!-- Left Side: Welcome Content -->
+    <div class="login-welcome">
+      <div class="welcome-content">
+        <div class="welcome-icon">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <h2 class="welcome-title">Welcome Back!</h2>
+        <p class="welcome-text">
+          Sign in to access your dashboard, track grievances, and connect with your community.
+        </p>
+        <div class="welcome-features">
+          <div class="welcome-feature">
+            <i class="fas fa-check-circle"></i>
+            <span>Track your grievance status</span>
+          </div>
+          <div class="welcome-feature">
+            <i class="fas fa-check-circle"></i>
+            <span>Receive real-time notifications</span>
+          </div>
+          <div class="welcome-feature">
+            <i class="fas fa-check-circle"></i>
+            <span>Engage with your community</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Login Form -->
+    <div class="login-form-wrapper">
+      <div class="login-form-container">
+        <!-- Form Header -->
+        <div class="form-header">
+          <h1 class="form-title">Sign In</h1>
+          <p class="form-subtitle">Enter your credentials to access your account</p>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-alert" *ngIf="errorMessage">
+          <i class="fas fa-exclamation-circle"></i>
+          <span>{{ errorMessage }}</span>
+        </div>
+
+        <!-- Login Form -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          
+          <!-- Email Field -->
+          <div class="form-group">
+            <label for="email" class="form-label">
+              Email Address <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i class="fas fa-envelope input-icon"></i>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                class="form-input"
+                [class.error]="email?.invalid && email?.touched"
+                placeholder="you@example.com"
+                autocomplete="email"
+              />
+            </div>
+            <div class="error-message" *ngIf="email?.invalid && email?.touched">
+              <span *ngIf="email?.errors?.['required']">Email is required</span>
+              <span *ngIf="email?.errors?.['email']">Please enter a valid email</span>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="form-group">
+            <label for="password" class="form-label">
+              Password <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock input-icon"></i>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                formControlName="password"
+                class="form-input"
+                [class.error]="password?.invalid && password?.touched"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePasswordVisibility()"
+                tabindex="-1"
+              >
+                <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+              </button>
+            </div>
+            <div class="error-message" *ngIf="password?.invalid && password?.touched">
+              <span *ngIf="password?.errors?.['required']">Password is required</span>
+              <span *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters</span>
+            </div>
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="form-options">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="rememberMe" class="checkbox-input" />
+              <span class="checkbox-text">Remember me</span>
+            </label>
+            <a href="/auth/forgot-password" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-submit" [disabled]="isLoading">
+            <span *ngIf="!isLoading">
+              <i class="fas fa-sign-in-alt"></i>
+              Sign In
+            </span>
+            <span *ngIf="isLoading" class="loading-spinner">
+              <i class="fas fa-spinner fa-spin"></i>
+              Signing in...
+            </span>
+          </button>
+        </form>
+
+        <!-- Register Link -->
+        <div class="form-footer">
+          <p class="footer-text">
+            Don't have an account?
+            <a (click)="navigateToRegister()" class="register-link">Create Account</a>
+          </p>
+        </div>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>Or sign in as</span>
+        </div>
+
+        <!-- Quick Login Options (Demo Accounts) -->
+        <div class="quick-login-options">
+          <div class="quick-login-note">
+            <i class="fas fa-info-circle"></i>
+            <span>Use these demo credentials for testing</span>
+          </div>
+          <div class="quick-login-grid">
+            <div class="quick-login-card">
+              <i class="fas fa-user"></i>
+              <span class="role-name">Locality Member</span>
+              <span class="demo-email">citizen@demo.com</span>
+            </div>
+            <div class="quick-login-card">
+              <i class="fas fa-user-tie"></i>
+              <span class="role-name">Gov Official</span>
+              <span class="demo-email">official@demo.com</span>
+            </div>
+          </div>
+          <p class="demo-password">Password: <strong>demo123</strong></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="auth-footer">
+  <div class="container">
+    <p class="footer-copyright">
+      © 2026 GrievEase. All rights reserved.
+    </p>
+    <div class="footer-links">
+      <a href="/privacy">Privacy Policy</a>
+      <span>•</span>
+      <a href="/terms">Terms of Service</a>
+      <span>•</span>
+      <a href="/help">Help Center</a>
+    </div>
+  </div>
+</footer>
