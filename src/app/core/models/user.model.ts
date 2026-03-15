@@ -3,9 +3,10 @@
  */
 export interface User {
   id: number;
-  fullName: string;
+  name: string;
   email: string;
   phoneNumber: string;
+  address:string;
   role: UserRole;
   department?: string;
   profilePictureUrl?: string;
@@ -36,9 +37,10 @@ export interface LoginRequest {
  * Register Request DTO
  */
 export interface RegisterRequest {
-  fullName: string;
+  name: string;
   email: string;
   phoneNumber: string;
+  address:string;
   password: string;
   confirmPassword: string;
   role: UserRole;

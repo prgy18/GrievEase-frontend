@@ -142,6 +142,29 @@
             </div>
           </div>
 
+          <!-- Address Field -->
+          <div class="form-group">
+            <label for="address" class="form-label">
+              Address <span class="required">*</span>
+            </label>
+            <div class="input-wrapper">
+              <i class="fas fa-map-marker-alt input-icon"></i>
+              <input
+                type="text"
+                id="address"
+                formControlName="address"
+                class="form-input"
+                [class.error]="address?.invalid && address?.touched"
+                placeholder="123 Main Street, City, State"
+                autocomplete="street-address"
+              />
+            </div>
+            <div class="error-message" *ngIf="address?.invalid && address?.touched">
+              <span *ngIf="address?.errors?.['required']">Address is required</span>
+              <span *ngIf="address?.errors?.['minlength']">Address must be at least 10 characters</span>
+            </div>
+          </div>
+
           <!-- Role Selection -->
           <div class="form-group">
             <label class="form-label">
