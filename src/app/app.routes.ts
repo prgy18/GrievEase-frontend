@@ -33,6 +33,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/rules/rules.component').then(m => m.RulesComponent),
     title: 'Community Guidelines - GrievEase'
   },
+  {
+    path: 'auth',
+    loadChildren: () => import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },
   // Auth Routes (Lazy Loaded - will be created later)
   // {
   //   path: 'auth',
