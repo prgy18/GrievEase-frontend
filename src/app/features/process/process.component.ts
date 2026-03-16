@@ -2,16 +2,21 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-process',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,HeaderComponent,FooterComponent],
   templateUrl: './process.component.html',
   styleUrls: ['./process.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class ProcessComponent {
+ constructor(
+    private router: Router
+  ) {}
 
   // Main Process Steps (3 steps)
   mainSteps = [
@@ -190,41 +195,13 @@ export class ProcessComponent {
       isOpen: false
     }
   ];
-
-  constructor(private router: Router, public authService: AuthService) {}
-
+ navigateToSignup(): void {
+    this.router.navigate(['/auth/register']);
+  }
   toggleFaq(index: number): void {
     this.faqs[index].isOpen = !this.faqs[index].isOpen;
   }
 
-  navigateToSignup(): void {
-    this.router.navigate(['/auth/register']);
-  }
-
-  navigateToHome(): void {
-    this.router.navigate(['/']);
-  }
-
-  navigateToAbout(): void {
-    this.router.navigate(['/about']);
-  }
-  get isLoggedIn(): boolean {
-    return this.authService.isAuthenticated();
-  }
-
-  get userName(): string | null {
-    const user = this.authService.currentUserValue;
-    return user ? user.name : null;
-  }
-
   // ... existing methods ...
 
-  navigateToLogin(): void {
-    this.router.navigate(['/auth/login']);
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/']);
-  }
 }

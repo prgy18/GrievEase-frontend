@@ -2,11 +2,13 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,HeaderComponent,FooterComponent],
   templateUrl: './about.component.html',
   styleUrls: ['./about.component.css'],
   encapsulation: ViewEncapsulation.None
@@ -14,7 +16,9 @@ import { AuthService } from '../../core/services/auth.service';
 export class AboutComponent {
   
   // Vision Points
- 
+constructor(
+    private router: Router,
+  ) {}
   visionPoints = [
     {
       icon: 'fa-eye',
@@ -80,40 +84,8 @@ export class AboutComponent {
       icon: 'fa-clock'
     }
   ];
- constructor(
-    private router: Router,
-    public authService: AuthService
-  ) {}
- get isLoggedIn(): boolean {
-    return this.authService.isAuthenticated();
-  }
-
-  get userName(): string | null {
-    const user = this.authService.currentUserValue;
-    return user ? user.name : null;
-  }
-navigateToLogin(): void {
-    this.router.navigate(['/auth/login']);
-  }
-
-  navigateToSignup(): void {
+   navigateToSignup(): void {
     this.router.navigate(['/auth/register']);
   }
 
-  navigateToHome(): void {
-    this.router.navigate(['/']);
-  }
-
-  navigateToProcess(): void {
-    this.router.navigate(['/process']);
-  }
-
-  navigateToRules(): void {
-    this.router.navigate(['/rules']);
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/']);
-  }
 }

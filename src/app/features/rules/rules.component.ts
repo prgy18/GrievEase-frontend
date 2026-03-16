@@ -2,17 +2,21 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-rules',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,HeaderComponent,FooterComponent],
   templateUrl: './rules.component.html',
   styleUrls: ['./rules.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class RulesComponent {
-
+constructor(
+    private router: Router
+  ) {}
   // Community Guidelines Sections
   guidelines = [
     {
@@ -190,46 +194,9 @@ export class RulesComponent {
     { name: 'Parks & Gardens', icon: 'fa-tree' },
     { name: 'Electricity', icon: 'fa-bolt' }
   ];
-
-  constructor(private router: Router,public authService: AuthService) {}
-get isLoggedIn(): boolean {
-    return this.authService.isAuthenticated();
-  }
-
-  get userName(): string | null {
-    const user = this.authService.currentUserValue;
-    return user ? user.name : null;
-  }
-
-  // ... existing methods ...
-
-  navigateToLogin(): void {
-    this.router.navigate(['/auth/login']);
-  }
-
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/']);
-  }
-  navigateToSignup(): void {
+   navigateToSignup(): void {
     this.router.navigate(['/auth/register']);
   }
-
-  navigateToHome(): void {
-    this.router.navigate(['/']);
-  }
-
-  navigateToAbout(): void {
-    this.router.navigate(['/about']);
-  }
-
-  navigateToProcess(): void {
-    this.router.navigate(['/process']);
-  }
-  navigateToRules(): void {
-    this.router.navigate(['/rules']);
-  }
-
   scrollToSection(sectionId: string): void {
     const element = document.getElementById(sectionId);
     if (element) {

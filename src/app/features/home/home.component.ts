@@ -125,11 +125,13 @@ import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { HeaderComponent } from '../../shared/header/header.component';
+import { FooterComponent } from '../../shared/footer/footer.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule,HeaderComponent,FooterComponent],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
@@ -188,72 +190,17 @@ export class HomeComponent {
     }
   ];
 
-  // Footer links
-  footerLinks = {
-    about: [
-      { label: 'About Us', link: '/about' },
-      { label: 'How It Works', link: '#how-it-works' },
-      { label: 'Community Guidelines', link: '/guidelines' }
-    ],
-    support: [
-      { label: 'Help Center', link: '/help' },
-      { label: 'Contact Us', link: '/contact' },
-      { label: 'FAQs', link: '/faqs' }
-    ],
-    legal: [
-      { label: 'Privacy Policy', link: '/privacy' },
-      { label: 'Terms of Service', link: '/terms' },
-      { label: 'Cookie Policy', link: '/cookies' }
-    ]
-  };
-
-  socialLinks = [
-    { icon: 'fa-github', url: 'https://github.com', label: 'GitHub' },
-    { icon: 'fa-twitter', url: 'https://twitter.com', label: 'Twitter' },
-    { icon: 'fa-linkedin', url: 'https://linkedin.com', label: 'LinkedIn' },
-    { icon: 'fa-envelope', url: 'mailto:contact@grievease.com', label: 'Email' }
-  ];
 
   constructor(
-    private router: Router,
-    public authService: AuthService  // Made public so template can access it
+    private router: Router
   ) {}
 
-  // Check if user is logged in
-  get isLoggedIn(): boolean {
-    return this.authService.isAuthenticated();
-  }
+  
 
-  // Get current user name
-  get userName(): string | null {
-    const user = this.authService.currentUserValue;
-    return user ? user.name : null;
-  }
-
-  navigateToAbout(): void {
-    this.router.navigate(['/about']);
-  }
-
-  navigateToSignup(): void {
+  
+ navigateToSignup(): void {
     this.router.navigate(['/auth/register']);
   }
-
-  navigateToProcess(): void {
-    this.router.navigate(['/process']);
-  }
-
-  navigateToLogin(): void {
-    this.router.navigate(['/auth/login']);
-  }
-
-  navigateToDashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
-
-  navigateToRules(): void {
-    this.router.navigate(['rules']);
-  }
-
   scrollToSection(sectionId: string): void {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -261,11 +208,4 @@ export class HomeComponent {
     }
   }
 
-  // Logout method
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/']);
-    // Optionally show a success message
-    console.log('Logged out successfully');
-  }
 }

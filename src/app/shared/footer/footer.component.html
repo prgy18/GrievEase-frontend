@@ -1,0 +1,69 @@
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-content">
+
+      <!-- ─── Brand Column ──────────────────────────────────── -->
+      <div class="footer-brand">
+        <div class="footer-logo" routerLink="/">
+          <div class="logo-icon">
+            <i class="fas fa-clipboard-check"></i>
+          </div>
+          <span class="brand-name">GrievEase</span>
+        </div>
+        <p class="footer-description">
+          Empowering communities through transparent, effective, and accountable
+          grievance management. Because your voice matters.
+        </p>
+        <div class="social-links">
+          <a
+            *ngFor="let social of socialLinks"
+            [href]="social.url"
+            target="_blank"
+            class="social-link"
+            [attr.aria-label]="social.label"
+          >
+            <i class="fab {{ social.icon }}"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- ─── About Links ───────────────────────────────────── -->
+      <div class="footer-column">
+        <h4 class="footer-heading">About</h4>
+        <ul class="footer-list">
+          <li *ngFor="let link of footerLinks.about">
+            <a [routerLink]="link.link">{{ link.label }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ─── Support Links ─────────────────────────────────── -->
+      <div class="footer-column">
+        <h4 class="footer-heading">Support</h4>
+        <ul class="footer-list">
+          <li *ngFor="let link of footerLinks.support">
+            <a [href]="link.link">{{ link.label }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- ─── Legal Links ───────────────────────────────────── -->
+      <div class="footer-column">
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-list">
+          <li *ngFor="let link of footerLinks.legal">
+            <a [href]="link.link">{{ link.label }}</a>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- ─── Footer Bottom ─────────────────────────────────────── -->
+    <div class="footer-bottom">
+      <p class="copyright">
+        © {{ currentYear }} GrievEase. All rights reserved. Built with ❤️ for the community.
+      </p>
+    </div>
+  </div>
+</footer>
