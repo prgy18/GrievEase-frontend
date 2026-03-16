@@ -35,59 +35,114 @@ export class AuthService {
   /**
    * Login user
    */
-  login(email: string, password: string, rememberMe: boolean = false): Observable<AuthResponse> {
-    const loginData: LoginRequest = { email, password };
+  // login(email: string, password: string, rememberMe: boolean = false): Observable<AuthResponse> {
+  //   const loginData: LoginRequest = { email, password };
 
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, loginData)
-      .pipe(
-        tap(response => {
-          // Save token and user to storage
-          this.tokenService.saveToken(response.token, rememberMe);
-          this.tokenService.saveUser(response.user, rememberMe);
+  //   return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, loginData)
+  //     .pipe(
+  //       tap(response => {
+  //         // Save token and user to storage
+  //         this.tokenService.saveToken(response.token, rememberMe);
+  //         this.tokenService.saveUser(response.user, rememberMe);
           
-          if (response.refreshToken) {
-            this.tokenService.saveRefreshToken(response.refreshToken, rememberMe);
-          }
+  //         if (response.refreshToken) {
+  //           this.tokenService.saveRefreshToken(response.refreshToken, rememberMe);
+  //         }
 
-          // Update current user
-          this.currentUserSubject.next(response.user);
+  //         // Update current user
+  //         this.currentUserSubject.next(response.user);
 
-          console.log('Login successful:', response.user.email);
-        }),
-        catchError(error => {
-          console.error('Login error:', error);
-          return throwError(() => error);
-        })
-      );
-  }
+  //         console.log('Login successful:', response.user.email);
+  //       }),
+  //       catchError(error => {
+  //         console.error('Login error:', error);
+  //         return throwError(() => error);
+  //       })
+  //     );
+  // }
+  /**
+ * Login user
+ */
+login(email: string, password: string, rememberMe: boolean = false): Observable<AuthResponse> {
+  const loginData: LoginRequest = { email, password };
+
+  return this.http.post<AuthResponse>(`${this.API_URL}/auth/login`, loginData)
+    .pipe(
+      tap(response => {
+        console.log('Login API Response:', response);
+        
+        // Extract data from wrapped response
+        const { token, user } = response.data;
+        
+        // Save token and user to storage
+        this.tokenService.saveToken(token, rememberMe);
+        this.tokenService.saveUser(user, rememberMe);
+
+        // Update current user
+        this.currentUserSubject.next(user);
+
+        console.log('Login successful:', user.email);
+      }),
+      catchError(error => {
+        console.error('Login error:', error);
+        return throwError(() => error);
+      })
+    );
+}
 
   /**
    * Register new user
    */
-  register(registerData: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, registerData)
-      .pipe(
-        tap(response => {
-          // Save token and user to storage
-          this.tokenService.saveToken(response.token, false);
-          this.tokenService.saveUser(response.user, false);
+  // register(registerData: RegisterRequest): Observable<AuthResponse> {
+  //   return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, registerData)
+  //     .pipe(
+  //       tap(response => {
+  //         // Save token and user to storage
+  //         this.tokenService.saveToken(response.token, false);
+  //         this.tokenService.saveUser(response.user, false);
           
-          if (response.refreshToken) {
-            this.tokenService.saveRefreshToken(response.refreshToken, false);
-          }
+  //         if (response.refreshToken) {
+  //           this.tokenService.saveRefreshToken(response.refreshToken, false);
+  //         }
 
-          // Update current user
-          this.currentUserSubject.next(response.user);
+  //         // Update current user
+  //         this.currentUserSubject.next(response.user);
 
-          console.log('Registration successful:', response.user.email);
-        }),
-        catchError(error => {
-          console.error('Registration error:', error);
-          return throwError(() => error);
-        })
-      );
-  }
+  //         console.log('Registration successful:', response.user.email);
+  //       }),
+  //       catchError(error => {
+  //         console.error('Registration error:', error);
+  //         return throwError(() => error);
+  //       })
+  //     );
+  // }
+/**
+ * Register new user
+ */
+register(registerData: RegisterRequest): Observable<AuthResponse> {
+  return this.http.post<AuthResponse>(`${this.API_URL}/auth/register`, registerData)
+    .pipe(
+      tap(response => {
+        console.log('Registration API Response:', response);
+        
+        // Extract data from wrapped response
+        const { token, user } = response.data;
+        
+        // Save token and user to storage
+        this.tokenService.saveToken(token, false);
+        this.tokenService.saveUser(user, false);
 
+        // Update current user
+        this.currentUserSubject.next(user);
+
+        console.log('Registration successful:', user.email);
+      }),
+      catchError(error => {
+        console.error('Registration error:', error);
+        return throwError(() => error);
+      })
+    );
+}
   /**
    * Logout user
    */
@@ -170,32 +225,32 @@ export class AuthService {
   /**
    * Refresh authentication token
    */
-  refreshToken(): Observable<AuthResponse> {
-    const refreshToken = this.tokenService.getRefreshToken();
+  // refreshToken(): Observable<AuthResponse> {
+  //   const refreshToken = this.tokenService.getRefreshToken();
     
-    if (!refreshToken) {
-      return throwError(() => new Error('No refresh token available'));
-    }
+  //   if (!refreshToken) {
+  //     return throwError(() => new Error('No refresh token available'));
+  //   }
 
-    return this.http.post<AuthResponse>(`${this.API_URL}/auth/refresh`, { refreshToken })
-      .pipe(
-        tap(response => {
-          // Update token
-          this.tokenService.saveToken(response.token, true);
+  //   return this.http.post<AuthResponse>(`${this.API_URL}/auth/refresh`, { refreshToken })
+  //     .pipe(
+  //       tap(response => {
+  //         // Update token
+  //         this.tokenService.saveToken(response.token, true);
           
-          if (response.refreshToken) {
-            this.tokenService.saveRefreshToken(response.refreshToken, true);
-          }
+  //         if (response.refreshToken) {
+  //           this.tokenService.saveRefreshToken(response.refreshToken, true);
+  //         }
 
-          console.log('Token refreshed successfully');
-        }),
-        catchError(error => {
-          console.error('Token refresh error:', error);
-          this.logout();
-          return throwError(() => error);
-        })
-      );
-  }
+  //         console.log('Token refreshed successfully');
+  //       }),
+  //       catchError(error => {
+  //         console.error('Token refresh error:', error);
+  //         this.logout();
+  //         return throwError(() => error);
+  //       })
+  //     );
+  // }
 
   /**
    * Verify email with token

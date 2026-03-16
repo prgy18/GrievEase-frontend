@@ -2,7 +2,7 @@
  * User Model - Matches backend User entity
  */
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phoneNumber: string;
@@ -50,11 +50,41 @@ export interface RegisterRequest {
 /**
  * Auth Response from API
  */
-export interface AuthResponse {
+// export interface AuthResponse {
+//   token: string;
+//   refreshToken?: string;
+//   user: User;
+//   expiresIn?: number;
+// }
+/**
+ * API Response Wrapper (from backend)
+ */
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  errors: any;
+}
+
+/**
+ * Auth Response Data (inside API wrapper)
+ */
+export interface AuthResponseData {
   token: string;
-  refreshToken?: string;
   user: User;
-  expiresIn?: number;
+}
+
+/**
+ * Auth Response from API (wrapped)
+ */
+export interface AuthResponse {
+  success: boolean;
+  message: string;
+  data: {
+    token: string;
+    user: User;
+  };
+  errors: any;
 }
 
 /**

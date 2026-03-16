@@ -16,18 +16,39 @@
     <a (click)="navigateToProcess()" class="nav-link">Process</a>
     <a (click)="navigateToRules()" class="nav-link">Rules</a>
       <!-- <a (click)="scrollToSection('features')" class="nav-link">Features</a> -->
-      <a (click)="navigateToDashboard()" class="nav-link">Dashboard</a>
+      <!-- <a (click)="navigateToDashboard()" class="nav-link">Dashboard</a>
+    </div> -->
+    <a *ngIf="isLoggedIn" (click)="navigateToDashboard()" class="nav-link">Dashboard</a>
     </div>
-
     <!-- Right: Auth Buttons -->
-    <div class="navbar-actions">
-      <button class="btn-nav btn-login" (click)="navigateToLogin()">
-        Login
-      </button>
-      <button class="btn-nav btn-signup" (click)="navigateToSignup()">
-        Sign Up
-      </button>
-    </div>
+    <!-- Right: Auth Buttons - Dynamic based on login status -->
+<div class="navbar-actions">
+  <!-- Show when NOT logged in -->
+  <ng-container *ngIf="!isLoggedIn">
+    <button class="btn-nav btn-login" (click)="navigateToLogin()">
+      Login
+    </button>
+    <button class="btn-nav btn-signup" (click)="navigateToSignup()">
+      Sign Up
+    </button>
+  </ng-container>
+
+  <!-- Show when logged in -->
+  <ng-container *ngIf="isLoggedIn">
+    <span class="user-greeting">
+      <i class="fas fa-user-circle"></i>
+      Welcome, {{ userName }}!
+    </span>
+    <!-- <button class="btn-nav btn-logout" (click)="logout()">
+      <i class="fas fa--large"></i>
+      Dashboard
+    </button> -->
+    <button class="btn-nav btn-logout" (click)="logout()">
+      <i class="fas fa-sign-out-alt"></i>
+      Logout
+    </button>
+  </ng-container>
+</div>
   </div>
 </nav>
 

@@ -1,6 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-process',
@@ -190,7 +191,7 @@ export class ProcessComponent {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, public authService: AuthService) {}
 
   toggleFaq(index: number): void {
     this.faqs[index].isOpen = !this.faqs[index].isOpen;
@@ -206,5 +207,24 @@ export class ProcessComponent {
 
   navigateToAbout(): void {
     this.router.navigate(['/about']);
+  }
+  get isLoggedIn(): boolean {
+    return this.authService.isAuthenticated();
+  }
+
+  get userName(): string | null {
+    const user = this.authService.currentUserValue;
+    return user ? user.name : null;
+  }
+
+  // ... existing methods ...
+
+  navigateToLogin(): void {
+    this.router.navigate(['/auth/login']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
   }
 }

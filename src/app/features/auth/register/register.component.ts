@@ -232,7 +232,7 @@ import { UserRole, RegisterRequest } from '../../../core/models/user.model';
   encapsulation: ViewEncapsulation.None
 })
 export class RegisterComponent implements OnInit {
-  registerForm!: FormGroup;
+  registerForm: FormGroup;
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -261,45 +261,93 @@ export class RegisterComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
-
-  ngOnInit(): void {
-    // If already logged in, redirect to dashboard
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate(['/dashboard']);
-      return;
-    }
-
-    // Initialize register form with address field
-    this.registerForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-      address: ['', [Validators.required, Validators.minLength(10)]], // ADDED
-      role: [UserRole.LocalityMember, [Validators.required]],
-      department: [''],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', [Validators.required]],
-      acceptTerms: [false, [Validators.requiredTrue]]
-    }, {
-      validators: this.passwordMatchValidator
-    });
-
-    // Listen to role changes to set department validators
-    this.registerForm.get('role')?.valueChanges.subscribe(role => {
-      const departmentControl = this.registerForm.get('department');
-      
-      if (role === UserRole.GovernmentOfficial) {
-        departmentControl?.setValidators([Validators.required]);
-      } else {
-        departmentControl?.clearValidators();
-        departmentControl?.setValue('');
-      }
-      
-      departmentControl?.updateValueAndValidity();
-    });
+  ) {
+    this.registerForm = this.fb.group({});
   }
 
+  // ngOnInit(): void {
+  //   // If already logged in, redirect to dashboard
+  //   if (this.authService.isAuthenticated()) {
+  //     this.router.navigate(['/dashboard']);
+  //     return;
+  //   }
+
+  //   // Initialize register form with address field
+  //   this.registerForm = this.fb.group({
+  //     fullName: ['', [Validators.required, Validators.minLength(3)]],
+  //     email: ['', [Validators.required, Validators.email]],
+  //     phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+  //     address: ['', [Validators.required, Validators.minLength(10)]], // ADDED
+  //     role: [UserRole.LocalityMember, [Validators.required]],
+  //     department: [''],
+  //     password: ['', [Validators.required, Validators.minLength(6)]],
+  //     confirmPassword: ['', [Validators.required]],
+  //     acceptTerms: [false, [Validators.requiredTrue]]
+  //   }, {
+  //     validators: this.passwordMatchValidator
+  //   });
+
+  //   // Listen to role changes to set department validators
+  //   this.registerForm.get('role')?.valueChanges.subscribe(role => {
+  //     const departmentControl = this.registerForm.get('department');
+      
+  //     if (role === UserRole.GovernmentOfficial) {
+  //       departmentControl?.setValidators([Validators.required]);
+  //     } else {
+  //       departmentControl?.clearValidators();
+  //       departmentControl?.setValue('');
+  //     }
+      
+  //     departmentControl?.updateValueAndValidity();
+  //   });
+  // }
+ ngOnInit(): void {
+  console.log('RegisterComponent initialized');
+  
+  // Clear any corrupted tokens on registration page load
+  const token = sessionStorage.getItem('grievease_token') || localStorage.getItem('grievease_token');
+  if (token === 'undefined' || token === 'null' || token === '') {
+    console.warn('Clearing corrupted token on register page');
+    localStorage.clear();
+    sessionStorage.clear();
+  }
+  
+  // If already logged in, redirect to dashboard
+  if (this.authService.isAuthenticated()) {
+    console.log('User already authenticated, redirecting to dashboard');
+    this.router.navigate(['/dashboard']);
+    return;
+  }
+
+  // Initialize register form with address field
+  this.registerForm = this.fb.group({
+    fullName: ['', [Validators.required, Validators.minLength(3)]],
+    email: ['', [Validators.required, Validators.email]],
+    phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+    address: ['', [Validators.required, Validators.minLength(10)]],
+    role: [UserRole.LocalityMember, [Validators.required]],
+    department: [''],
+    password: ['', [Validators.required, Validators.minLength(6)]],
+    confirmPassword: ['', [Validators.required]],
+    acceptTerms: [false, [Validators.requiredTrue]]
+  }, {
+    validators: this.passwordMatchValidator
+  });
+
+  // Listen to role changes
+  this.registerForm.get('role')?.valueChanges.subscribe(role => {
+    const departmentControl = this.registerForm.get('department');
+    
+    if (role === UserRole.GovernmentOfficial) {
+      departmentControl?.setValidators([Validators.required]);
+    } else {
+      departmentControl?.clearValidators();
+      departmentControl?.setValue('');
+    }
+    
+    departmentControl?.updateValueAndValidity();
+  });
+}
   // Custom validator for password match
   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
     const password = control.get('password');

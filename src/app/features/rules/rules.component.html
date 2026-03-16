@@ -14,18 +14,33 @@
       <a (click)="navigateToHome()" class="nav-link">Home</a>
       <a (click)="navigateToAbout()" class="nav-link">About Us</a>
       <a (click)="navigateToProcess()" class="nav-link">Process</a>
-      <a class="nav-link active">Rules</a>
-      <a href="/dashboard" class="nav-link">Dashboard</a>
+      <!-- <a class="nav-link active">Rules</a>
+      <a href="/dashboard" class="nav-link">Dashboard</a> -->
+      <a (click)="navigateToRules()" class="nav-link">Rules</a>
+      <a *ngIf="isLoggedIn" href="/dashboard" class="nav-link">Dashboard</a>
     </div>
 
     <!-- Right: Auth Buttons -->
     <div class="navbar-actions">
-      <button class="btn-nav btn-login" (click)="navigateToHome()">
-        Login
-      </button>
-      <button class="btn-nav btn-signup" (click)="navigateToSignup()">
-        Sign Up
-      </button>
+      <ng-container *ngIf="!isLoggedIn">
+        <button class="btn-nav btn-login" (click)="navigateToLogin()">
+          Login
+        </button>
+        <button class="btn-nav btn-signup" (click)="navigateToSignup()">
+          Sign Up
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="isLoggedIn">
+        <span class="user-greeting">
+          <i class="fas fa-user-circle"></i>
+          Welcome, {{ userName }}!
+        </span>
+        <button class="btn-nav btn-logout" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </button>
+      </ng-container>
     </div>
   </div>
 </nav>

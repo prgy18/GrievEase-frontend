@@ -1,6 +1,7 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-rules',
@@ -190,8 +191,26 @@ export class RulesComponent {
     { name: 'Electricity', icon: 'fa-bolt' }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router,public authService: AuthService) {}
+get isLoggedIn(): boolean {
+    return this.authService.isAuthenticated();
+  }
 
+  get userName(): string | null {
+    const user = this.authService.currentUserValue;
+    return user ? user.name : null;
+  }
+
+  // ... existing methods ...
+
+  navigateToLogin(): void {
+    this.router.navigate(['/auth/login']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/']);
+  }
   navigateToSignup(): void {
     this.router.navigate(['/auth/register']);
   }
@@ -206,6 +225,9 @@ export class RulesComponent {
 
   navigateToProcess(): void {
     this.router.navigate(['/process']);
+  }
+  navigateToRules(): void {
+    this.router.navigate(['/rules']);
   }
 
   scrollToSection(sectionId: string): void {

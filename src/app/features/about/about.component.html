@@ -13,19 +13,32 @@
     <div class="navbar-links">
       <a (click)="navigateToHome()" class="nav-link">Home</a>
       <a class="nav-link active">About Us</a>
-      <a href="#how-it-works" class="nav-link">Process</a>
-      <a href="#features" class="nav-link">Features</a>
-      <a href="/dashboard" class="nav-link">Dashboard</a>
+      <a href="navigateToProcess()" class="nav-link">Process</a>
+      <a href="navigateToRules()" class="nav-link">Features</a>
+      <a *ngIf="isLoggedIn" href="/dashboard" class="nav-link">Dashboard</a>
     </div>
 
     <!-- Right: Auth Buttons -->
     <div class="navbar-actions">
-      <button class="btn-nav btn-login" (click)="navigateToHome()">
+      <ng-container *ngIf="!isLoggedIn">
+      <button class="btn-nav btn-login" (click)="navigateToLogin()">
         Login
       </button>
       <button class="btn-nav btn-signup" (click)="navigateToSignup()">
         Sign Up
       </button>
+      </ng-container>
+
+      <ng-container *ngIf="isLoggedIn">
+        <span class="user-greeting">
+          <i class="fas fa-user-circle"></i>
+          Welcome, {{ userName }}!
+        </span>
+        <button class="btn-nav btn-logout" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </button>
+      </ng-container>
     </div>
   </div>
 </nav>

@@ -13,7 +13,7 @@ import { AuthService } from '../../../core/services/auth.service';
   encapsulation: ViewEncapsulation.None
 })
 export class LoginComponent implements OnInit {
-  loginForm!: FormGroup;
+  loginForm: FormGroup;
   isLoading = false;
   errorMessage = '';
   showPassword = false;
@@ -22,7 +22,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) {this.loginForm = this.fb.group({});}
 
   ngOnInit(): void {
     // If already logged in, redirect to dashboard
