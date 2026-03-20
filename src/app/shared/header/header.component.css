@@ -15,21 +15,23 @@
 }
 
 .header-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.25rem 2rem;
+  width: 100%;
+  padding: 1.25rem 2.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 2rem;
 }
 
 /* ─── Brand / Logo ───────────────────────────────────────────────── */
+/* flex-shrink: 0 — brand never gets squished by the nav links       */
 .header-brand {
   display: flex;
   align-items: center;
   gap: 1rem;
   cursor: pointer;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .logo-icon {
@@ -55,10 +57,14 @@
 }
 
 /* ─── Nav Links ──────────────────────────────────────────────────── */
+/* flex: 1 makes nav links take all available middle space            */
+/* justify-content: center keeps them centred between brand & actions */
 .header-links {
   display: flex;
   gap: 2.5rem;
   align-items: center;
+  flex: 1;
+  justify-content: center;
 }
 
 .nav-link {
@@ -92,10 +98,12 @@
 }
 
 /* ─── Auth Buttons ───────────────────────────────────────────────── */
+/* flex-shrink: 0 — actions never get squished, always stay right    */
 .header-actions {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
 }
 
 .btn-header {
@@ -138,48 +146,35 @@
 }
 
 /* ─── Logged-in state ────────────────────────────────────────────── */
+
+/* Subtle welcome text — no heavy box, just a clean inline label     */
 .user-greeting {
   font-family: 'Open Sans', sans-serif;
-  color: #0A3161;
+  color: #4A5568;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: #F5F7FA;
-  border-radius: 4px;
-  border: 2px solid #CBD5E0;
+  letter-spacing: 0.2px;
 }
 
 .user-greeting i {
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   color: #0A3161;
 }
 
-.btn-dashboard {
-  background: #2E7D32;
-  color: white;
-  border-color: #2E7D32;
-}
-
-.btn-dashboard:hover {
-  background: #1B5E20;
-  border-color: #1B5E20;
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.25);
-}
-
+/* Logout — navy outline style, matches the Login button pattern     */
 .btn-logout {
-  background: #DC2626;
-  color: white;
-  border-color: #DC2626;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.2);
+  background: transparent;
+  color: #0A3161;
+  border-color: #0A3161;
 }
 
 .btn-logout:hover {
-  background: #B91C1C;
-  border-color: #B91C1C;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+  background: #0A3161;
+  color: white;
+  box-shadow: 0 4px 12px rgba(10, 49, 97, 0.2);
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────── */
