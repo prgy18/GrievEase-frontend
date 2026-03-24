@@ -1,0 +1,481 @@
+<!-- ─── Success State ──────────────────────────────────────────── -->
+<div class="success-screen" *ngIf="submitSuccess">
+  <div class="success-icon">
+    <i class="fas fa-check-circle"></i>
+  </div>
+  <h2 class="success-title">Grievance Submitted!</h2>
+  <p class="success-sub">
+    Your grievance has been submitted successfully and is now <strong>Pending</strong> review.
+    Redirecting to My Grievances...
+  </p>
+</div>
+
+<!-- ─── Main Form ───────────────────────────────────────────────── -->
+<div class="submit-wrap" *ngIf="!submitSuccess">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Submit a Grievance</h1>
+      <p class="page-sub">
+        Report a civic issue in your area. It will be tracked and resolved by the concerned department.
+      </p>
+    </div>
+  </div>
+
+  <!-- Progress Bar -->
+  <div class="progress-steps">
+    <div class="step" [class.step--done]="true">
+      <div class="step-circle"><i class="fas fa-user"></i></div>
+      <span class="step-label">Your Details</span>
+    </div>
+    <div class="step-connector" [class.connector--done]="true"></div>
+    <div class="step" [class.step--done]="true">
+      <div class="step-circle"><i class="fas fa-map-marker-alt"></i></div>
+      <span class="step-label">Location</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step" [class.step--active]="true">
+      <div class="step-circle"><i class="fas fa-clipboard"></i></div>
+      <span class="step-label">Issue</span>
+    </div>
+    <div class="step-connector"></div>
+    <div class="step">
+      <div class="step-circle"><i class="fas fa-camera"></i></div>
+      <span class="step-label">Photo</span>
+    </div>
+  </div>
+
+  <!-- Error Banner -->
+  <div class="error-banner" *ngIf="submitError">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>{{ submitError }}</span>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="form-layout">
+
+      <!-- ─── LEFT: Form Sections ────────────────────────────── -->
+      <div class="form-left">
+
+        <!-- SECTION 1: Reporter Info -->
+        <div class="form-card">
+          <div class="card-section-header">
+            <div class="section-icon-wrap navy">
+              <i class="fas fa-user"></i>
+            </div>
+            <div>
+              <div class="section-title">Reporter Information</div>
+              <div class="section-sub">Your contact details for this grievance</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-grid">
+              <div class="field">
+                <label class="field-label">Full Name <span class="req">*</span></label>
+                <div class="input-wrap">
+                  <i class="fas fa-user input-icon"></i>
+                  <input
+                    type="text"
+                    formControlName="name"
+                    class="field-input"
+                    [class.field-input--error]="isInvalid('name')"
+                    placeholder="Your full name"
+                  />
+                </div>
+                <span class="field-error" *ngIf="isInvalid('name')">{{ getError('name') }}</span>
+              </div>
+              <div class="field">
+                <label class="field-label">Phone Number <span class="req">*</span></label>
+                <div class="input-wrap">
+                  <i class="fas fa-phone input-icon"></i>
+                  <input
+                    type="tel"
+                    formControlName="phoneNumber"
+                    class="field-input"
+                    [class.field-input--error]="isInvalid('phoneNumber')"
+                    placeholder="10-digit mobile number"
+                    maxlength="10"
+                  />
+                </div>
+                <span class="field-error" *ngIf="isInvalid('phoneNumber')">{{ getError('phoneNumber') }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Location -->
+        <div class="form-card">
+          <div class="card-section-header">
+            <div class="section-icon-wrap blue">
+              <i class="fas fa-map-marker-alt"></i>
+            </div>
+            <div>
+              <div class="section-title">Location Details</div>
+              <div class="section-sub">Enter pincode to auto-fill city & state</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field-grid">
+
+              <!-- Pincode with auto-fill -->
+              <div class="field">
+                <label class="field-label">Pincode <span class="req">*</span></label>
+                <div class="input-wrap">
+                  <i class="fas fa-hashtag input-icon"></i>
+                  <input
+                    type="text"
+                    formControlName="pincode"
+                    class="field-input"
+                    [class.field-input--error]="isInvalid('pincode')"
+                    placeholder="6-digit pincode"
+                    maxlength="6"
+                  />
+                  <div class="input-suffix" *ngIf="pincodeStatus === 'loading'">
+                    <i class="fas fa-spinner fa-spin"></i>
+                  </div>
+                  <div class="input-suffix input-suffix--ok" *ngIf="pincodeStatus === 'success'">
+                    <i class="fas fa-check"></i>
+                  </div>
+                </div>
+                <span class="field-hint field-hint--ok" *ngIf="pincodeStatus === 'success'">
+                  <i class="fas fa-check-circle"></i> {{ pincodeMessage }}
+                </span>
+                <span class="field-hint field-hint--loading" *ngIf="pincodeStatus === 'loading'">
+                  <i class="fas fa-spinner fa-spin"></i> Looking up pincode...
+                </span>
+                <span class="field-hint field-hint--error" *ngIf="pincodeStatus === 'error'">
+                  <i class="fas fa-exclamation-circle"></i> {{ pincodeMessage }}
+                </span>
+                <span class="field-error" *ngIf="isInvalid('pincode') && pincodeStatus === 'idle'">
+                  {{ getError('pincode') }}
+                </span>
+              </div>
+
+              <div class="field">
+                <label class="field-label">Street / Road <span class="req">*</span></label>
+                <div class="input-wrap">
+                  <i class="fas fa-road input-icon"></i>
+                  <input
+                    type="text"
+                    formControlName="street"
+                    class="field-input"
+                    [class.field-input--error]="isInvalid('street')"
+                    placeholder="e.g. 12B MG Road"
+                  />
+                </div>
+                <span class="field-error" *ngIf="isInvalid('street')">{{ getError('street') }}</span>
+              </div>
+
+              <div class="field">
+                <label class="field-label">Locality / Area <span class="req">*</span></label>
+                <div class="input-wrap">
+                  <i class="fas fa-map-pin input-icon"></i>
+                  <input
+                    type="text"
+                    formControlName="locality"
+                    class="field-input"
+                    [class.field-input--error]="isInvalid('locality')"
+                    placeholder="e.g. Civil Lines"
+                  />
+                </div>
+                <span class="field-error" *ngIf="isInvalid('locality')">{{ getError('locality') }}</span>
+              </div>
+
+              <!-- City — auto-filled, read-only when pincode success -->
+              <div class="field">
+                <label class="field-label">
+                  City <span class="req">*</span>
+                  <span class="auto-label" *ngIf="pincodeStatus === 'success'">
+                    <i class="fas fa-magic"></i> Auto-filled
+                  </span>
+                </label>
+                <div class="input-wrap">
+                  <i class="fas fa-city input-icon"></i>
+                  <input
+                    type="text"
+                    formControlName="city"
+                    class="field-input"
+                    [class.field-input--prefilled]="pincodeStatus === 'success'"
+                    [class.field-input--error]="isInvalid('city')"
+                    placeholder="City"
+                    [readonly]="pincodeStatus === 'success'"
+                  />
+                </div>
+                <span class="field-error" *ngIf="isInvalid('city')">{{ getError('city') }}</span>
+              </div>
+
+              <!-- State — auto-filled, read-only when pincode success -->
+              <div class="field">
+                <label class="field-label">
+                  State <span class="req">*</span>
+                  <span class="auto-label" *ngIf="pincodeStatus === 'success'">
+                    <i class="fas fa-magic"></i> Auto-filled
+                  </span>
+                </label>
+                <div class="input-wrap">
+                  <i class="fas fa-map input-icon"></i>
+                  <input
+                    type="text"
+                    formControlName="state"
+                    class="field-input"
+                    [class.field-input--prefilled]="pincodeStatus === 'success'"
+                    [class.field-input--error]="isInvalid('state')"
+                    placeholder="State"
+                    [readonly]="pincodeStatus === 'success'"
+                  />
+                </div>
+                <span class="field-error" *ngIf="isInvalid('state')">{{ getError('state') }}</span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Issue Details -->
+        <div class="form-card">
+          <div class="card-section-header">
+            <div class="section-icon-wrap amber">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div>
+              <div class="section-title">Issue Details</div>
+              <div class="section-sub">Select the department and describe the problem</div>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <!-- Department Cards -->
+            <div class="field" style="margin-bottom: 1.25rem;">
+              <label class="field-label">Department <span class="req">*</span></label>
+              <div class="dept-grid">
+                <button
+                  type="button"
+                  class="dept-card"
+                  *ngFor="let dept of departments"
+                  [class.dept-card--selected]="form.get('department')?.value === dept"
+                  (click)="selectDepartment(dept)"
+                >
+                  <i class="fas {{ deptConfig[dept].icon }} dept-icon"></i>
+                  <span class="dept-label">{{ deptConfig[dept].label }}</span>
+                </button>
+              </div>
+              <span class="field-error" *ngIf="isInvalid('department')">Please select a department</span>
+            </div>
+
+            <!-- Description -->
+            <div class="field">
+              <div class="field-label-row">
+                <label class="field-label">Description <span class="req">*</span></label>
+                <span class="char-count" [class.char-count--warn]="descLength > 1800">
+                  {{ descLength }} / 2000
+                </span>
+              </div>
+              <textarea
+                formControlName="description"
+                class="field-textarea"
+                [class.field-input--error]="isInvalid('description')"
+                rows="5"
+                placeholder="Describe the issue clearly — what is the problem, how long has it been there, and how does it affect residents?"
+              ></textarea>
+              <span class="field-error" *ngIf="isInvalid('description')">{{ getError('description') }}</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SECTION 4: Photo Upload -->
+        <div class="form-card">
+          <div class="card-section-header">
+            <div class="section-icon-wrap green">
+              <i class="fas fa-camera"></i>
+            </div>
+            <div>
+              <div class="section-title">Photo Evidence <span class="req">*</span></div>
+              <div class="section-sub">Upload a clear photo of the issue (JPG/PNG/WEBP · max 5MB)</div>
+            </div>
+          </div>
+          <div class="card-body">
+
+            <!-- Upload area — shown when no image selected -->
+            <label
+              class="upload-area"
+              *ngIf="!imageFile"
+              for="img-input"
+              [class.upload-area--error]="imageUploadStatus === 'error'"
+            >
+              <div class="upload-icon-wrap">
+                <i class="fas fa-cloud-upload-alt"></i>
+              </div>
+              <div class="upload-title">Click to upload or drag & drop</div>
+              <div class="upload-sub">JPG, PNG or WEBP · Max 5MB</div>
+              <input
+                id="img-input"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onFileSelected($event)"
+                style="display:none"
+              />
+            </label>
+
+            <!-- Preview — shown after image selected -->
+            <div class="image-preview-wrap" *ngIf="imageFile">
+              <img
+                [src]="imagePreviewUrl"
+                alt="Preview"
+                class="image-preview"
+              />
+              <div class="image-preview-overlay">
+                <div class="upload-status">
+                  <span *ngIf="imageUploadStatus === 'uploading'" class="status-uploading">
+                    <i class="fas fa-spinner fa-spin"></i> Uploading to Cloudinary...
+                  </span>
+                  <span *ngIf="imageUploadStatus === 'done'" class="status-done">
+                    <i class="fas fa-check-circle"></i> Upload complete
+                  </span>
+                  <span *ngIf="imageUploadStatus === 'error'" class="status-error">
+                    <i class="fas fa-times-circle"></i> Upload failed
+                  </span>
+                </div>
+                <button type="button" class="remove-image-btn" (click)="removeImage()">
+                  <i class="fas fa-trash-alt"></i> Remove
+                </button>
+              </div>
+            </div>
+
+            <!-- Cloudinary note -->
+            <div class="cloudinary-note">
+              <i class="fas fa-cloud"></i>
+              Image is securely uploaded to Cloudinary. The URL is then attached to your grievance.
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Submit Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" (click)="cancel()">
+            <i class="fas fa-arrow-left"></i> Cancel
+          </button>
+          <button
+            type="submit"
+            class="btn-submit"
+            [disabled]="!canSubmit"
+          >
+            <span *ngIf="!isSubmitting">
+              <i class="fas fa-paper-plane"></i> Submit Grievance
+            </span>
+            <span *ngIf="isSubmitting" class="btn-loading">
+              <i class="fas fa-spinner fa-spin"></i> Submitting...
+            </span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ─── RIGHT: Live Summary ─────────────────────────────── -->
+      <div class="form-right">
+
+        <div class="summary-card">
+          <div class="summary-header">
+            <i class="fas fa-eye summary-header-icon"></i>
+            <div>
+              <div class="summary-header-title">Live Summary</div>
+              <div class="summary-header-sub">Updates as you fill the form</div>
+            </div>
+          </div>
+          <div class="summary-body">
+            <div class="summary-row">
+              <span class="summary-key">Name</span>
+              <span class="summary-val" [class.summary-val--empty]="!form.get('name')?.value">
+                {{ form.get('name')?.value || '—' }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Phone</span>
+              <span class="summary-val" [class.summary-val--empty]="!form.get('phoneNumber')?.value">
+                {{ form.get('phoneNumber')?.value || '—' }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Location</span>
+              <span class="summary-val" [class.summary-val--empty]="!form.get('locality')?.value">
+                {{ form.get('locality')?.value
+                  ? form.get('locality')?.value + ', ' + (form.get('city')?.value || '...')
+                  : '—' }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">City</span>
+              <span class="summary-val" [class.summary-val--empty]="!form.get('city')?.value">
+                {{ form.get('city')?.value || '—' }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">State</span>
+              <span class="summary-val" [class.summary-val--empty]="!form.get('state')?.value">
+                {{ form.get('state')?.value || '—' }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Department</span>
+              <span class="summary-val" [class.summary-val--empty]="!form.get('department')?.value">
+                <span
+                  class="dept-pill"
+                  *ngIf="form.get('department')?.value"
+                >
+                  <i class="fas {{ deptConfig[form.get('department')?.value]?.icon }}"></i>
+                  {{ form.get('department')?.value }}
+                </span>
+                <span *ngIf="!form.get('department')?.value">—</span>
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Description</span>
+              <span class="summary-val" [class.summary-val--empty]="!form.get('description')?.value">
+                {{ form.get('description')?.value
+                  ? (form.get('description')?.value | slice:0:60) + (form.get('description')?.value.length > 60 ? '…' : '')
+                  : '—' }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-key">Photo</span>
+              <span
+                class="summary-val"
+                [class.summary-val--uploading]="imageUploadStatus === 'uploading'"
+                [class.summary-val--done]="imageUploadStatus === 'done'"
+                [class.summary-val--empty]="imageUploadStatus === 'idle'"
+              >
+                <ng-container [ngSwitch]="imageUploadStatus">
+                  <span *ngSwitchCase="'idle'">—</span>
+                  <span *ngSwitchCase="'uploading'"><i class="fas fa-spinner fa-spin"></i> Uploading...</span>
+                  <span *ngSwitchCase="'done'"><i class="fas fa-check-circle"></i> Ready</span>
+                  <span *ngSwitchCase="'error'"><i class="fas fa-times-circle"></i> Failed</span>
+                </ng-container>
+              </span>
+            </div>
+            <div class="summary-row summary-row--last">
+              <span class="summary-key">Status after submit</span>
+              <span class="badge-pending">Pending</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- What happens next -->
+        <div class="next-steps-card">
+          <div class="next-steps-title">
+            <i class="fas fa-info-circle"></i> What happens next?
+          </div>
+          <ol class="next-steps-list">
+            <li>Grievance submitted as <strong>Pending</strong></li>
+            <li>Department reviews your complaint</li>
+            <li>Status updates to <strong>In Process</strong></li>
+            <li>Issue resolved → marked <strong>Solved</strong></li>
+            <li>Track progress in <strong>My Grievances</strong></li>
+          </ol>
+        </div>
+
+      </div>
+    </div>
+  </form>
+</div>

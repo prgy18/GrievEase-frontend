@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -17,11 +17,13 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
   showPassword = false;
+  private returnUrl = '/dashboard';
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute 
   ) {this.loginForm = this.fb.group({});}
 
   ngOnInit(): void {
@@ -30,7 +32,7 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['/dashboard']);
       return;
     }
-
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
     // Initialize login form
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],

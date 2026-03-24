@@ -1,0 +1,36 @@
+<aside class="sidebar">
+
+  <!-- User Card -->
+  <div class="sidebar-user">
+    <div class="user-avatar">{{ userInitials }}</div>
+    <div class="user-info">
+      <span class="user-name">{{ userName }}</span>
+      <span class="role-badge" [class.badge-official]="isOfficial">
+        <i class="fas" [class.fa-user-tie]="isOfficial" [class.fa-user]="!isOfficial"></i>
+        {{ userRole }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Navigation Groups -->
+  <nav class="sidebar-nav">
+    <div class="nav-group" *ngFor="let group of groups; let gi = index">
+      <span class="group-label">{{ group.label }}</span>
+      <a
+        *ngFor="let item of group.items; let i = index"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        class="sidebar-item"
+        [style.animation-delay]="(gi * group.items.length + i) * 40 + 'ms'"
+      >
+        <span class="item-icon-wrap">
+          <i class="fas {{ item.icon }}"></i>
+        </span>
+        <span class="item-label">{{ item.label }}</span>
+        <span class="item-indicator"></span>
+      </a>
+      <div class="group-divider" *ngIf="gi < groups.length - 1"></div>
+    </div>
+  </nav>
+
+</aside>
