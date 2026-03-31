@@ -233,12 +233,12 @@
   gap: 5px;
   margin-top: 4px;
   padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(201, 169, 97, 0.15);
+  border: 1px solid rgba(201, 169, 97, 0.4);
   border-radius: 20px;
   font-size: 0.68rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
+  color: #7A5C1E;
+  font-weight: 600;
   letter-spacing: 0.2px;
   white-space: nowrap;
   overflow: hidden;

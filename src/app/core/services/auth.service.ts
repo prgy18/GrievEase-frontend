@@ -73,13 +73,13 @@ login(email: string, password: string, rememberMe: boolean = false): Observable<
         
         // Extract data from wrapped response
         const { token, user } = response.data;
-        
+        const normalisedUser = this.normaliseUser(user);
         // Save token and user to storage
         this.tokenService.saveToken(token, rememberMe);
         this.tokenService.saveUser(user, rememberMe);
 
         // Update current user
-        this.currentUserSubject.next(user);
+        this.currentUserSubject.next(normalisedUser);
 
         console.log('Login successful:', user.email);
       }),
@@ -127,13 +127,15 @@ register(registerData: RegisterRequest): Observable<AuthResponse> {
         
         // Extract data from wrapped response
         const { token, user } = response.data;
+        const normalisedUser = this.normaliseUser(user);
         
         // Save token and user to storage
         this.tokenService.saveToken(token, false);
         this.tokenService.saveUser(user, false);
+        this.currentUserSubject.next(normalisedUser);
 
         // Update current user
-        this.currentUserSubject.next(user);
+      
 
         console.log('Registration successful:', user.email);
       }),
@@ -207,6 +209,21 @@ register(registerData: RegisterRequest): Observable<AuthResponse> {
   /**
    * Get user profile from server
    */
+  private normaliseUser(user: any): User {
+    let signInType: 'LocalityMember' | 'GovernmentOfficial';
+ 
+    if (user.signInType === 1 || user.signInType === 'GovernmentOfficial') {
+      signInType = 'GovernmentOfficial';
+    } else {
+      signInType = 'LocalityMember';
+    }
+ 
+    return {
+      ...user,
+      signInType
+    } as User;
+  }
+
   getProfile(): Observable<User> {
     return this.http.get<User>(`${this.API_URL}/auth/profile`)
       .pipe(
