@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
   encapsulation: ViewEncapsulation.None
@@ -78,6 +78,7 @@ export class LoginComponent implements OnInit {
     this.authService.login(email, password, rememberMe).subscribe({
       next: (response) => {
         // Login successful
+        console.log("Auth service ki call maarke aaya hu loading false krne se pehle");
         this.isLoading = false;
         
         // Navigate to dashboard

@@ -9,6 +9,11 @@
         <i class="fas" [class.fa-user-tie]="isOfficial" [class.fa-user]="!isOfficial"></i>
         {{ userRole }}
       </span>
+      <!-- Department badge — only visible for Government Officials -->
+      <span class="dept-badge" *ngIf="userDepartment">
+        <i class="fas fa-building"></i>
+        {{ userDepartment }}
+      </span>
     </div>
   </div>
 
@@ -21,8 +26,7 @@
         [routerLink]="item.route"
         routerLinkActive="active"
         class="sidebar-item"
-        [style.animation-delay]="(gi * group.items.length + i) * 40 + 'ms'"
-      >
+        [style.animation-delay]="(gi * group.items.length + i) * 40 + 'ms'">
         <span class="item-icon-wrap">
           <i class="fas {{ item.icon }}"></i>
         </span>

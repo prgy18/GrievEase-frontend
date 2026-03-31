@@ -15,9 +15,13 @@ export class TokenService {
    * Save JWT token to localStorage or sessionStorage
    */
   saveToken(token: string, rememberMe: boolean = false): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+    sessionStorage.removeItem(this.TOKEN_KEY);
     if (rememberMe) {
+      console.log("Inside save Token and remeber me true");
       localStorage.setItem(this.TOKEN_KEY, token);
     } else {
+      console.log("Inside save Token and remeber me false");
       sessionStorage.setItem(this.TOKEN_KEY, token);
     }
   }
@@ -26,7 +30,8 @@ export class TokenService {
    * Get JWT token from storage
    */
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY) || sessionStorage.getItem(this.TOKEN_KEY);
+    return localStorage.getItem(this.TOKEN_KEY)
+        ?? sessionStorage.getItem(this.TOKEN_KEY);
   }
 
   /**
@@ -63,6 +68,8 @@ export class TokenService {
    * Save user data to storage
    */
   saveUser(user: any, rememberMe: boolean = false): void {
+    localStorage.removeItem(this.USER_KEY);
+    sessionStorage.removeItem(this.USER_KEY);
     const userStr = JSON.stringify(user);
     if (rememberMe) {
       localStorage.setItem(this.USER_KEY, userStr);
@@ -78,7 +85,8 @@ export class TokenService {
  * Get user data from storage
  */
 getUser(): any | null {
-  const userStr = localStorage.getItem(this.USER_KEY) || sessionStorage.getItem(this.USER_KEY);
+  const userStr = localStorage.getItem(this.USER_KEY)
+             ?? sessionStorage.getItem(this.USER_KEY);
   
   // Check if userStr exists and is not 'undefined' string
   if (userStr && userStr !== 'undefined' && userStr !== 'null') {

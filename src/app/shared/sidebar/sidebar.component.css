@@ -226,6 +226,32 @@
   50%       { transform: scale(1.4); opacity: 0.6; }
 }
 
+/* ─── Department badge (officials only) ──────────────────────── */
+.dept-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.dept-badge i {
+  font-size: 0.6rem;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .sidebar {

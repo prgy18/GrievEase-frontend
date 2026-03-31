@@ -1,260 +1,48 @@
-// import { Component, ViewEncapsulation, OnInit } from '@angular/core';
-// import { CommonModule } from '@angular/common';
-// import { Router, RouterLink } from '@angular/router';
-// import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-// import { AuthService } from '../../../core/services/auth.service';
-// import { UserRole, RegisterRequest } from '../../../core/models/user.model';
 
-// @Component({
-//   selector: 'app-register',
-//   standalone: true,
-//   imports: [CommonModule, ReactiveFormsModule, RouterLink],
-//   templateUrl: './register.component.html',
-//   styleUrls: ['./register.component.css'],
-//   encapsulation: ViewEncapsulation.None
-// })
-// export class RegisterComponent implements OnInit {
-//   registerForm!: FormGroup;
-//   isLoading = false;
-//   errorMessage = '';
-//   successMessage = '';
-//   showPassword = false;
-//   showConfirmPassword = false;
-
-//   // User roles
-//   userRoles = [
-//     { value: UserRole.LocalityMember, label: 'Locality Member', description: 'Report civic issues in your area' },
-//     { value: UserRole.GovernmentOfficial, label: 'Government Official', description: 'Manage and resolve grievances' }
-//   ];
-
-//   // Government departments
-//   departments = [
-//     'Water Works',
-//     'Road & Infrastructure',
-//     'Garbage Management',
-//     'Electricity',
-//     'Public Safety',
-//     'Parks & Gardens',
-//     'Health & Sanitation',
-//     'Other'
-//   ];
-
-//   constructor(
-//     private fb: FormBuilder,
-//     private authService: AuthService,
-//     private router: Router
-//   ) {}
-
-//   ngOnInit(): void {
-//     // If already logged in, redirect to dashboard
-//     if (this.authService.isAuthenticated()) {
-//       this.router.navigate(['/dashboard']);
-//       return;
-//     }
-
-//     // Initialize register form
-//     this.registerForm = this.fb.group({
-//       fullName: ['', [Validators.required, Validators.minLength(3)]],
-//       email: ['', [Validators.required, Validators.email]],
-//       phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-//       role: [UserRole.LocalityMember, [Validators.required]],
-//       department: [''],
-//       password: ['', [Validators.required, Validators.minLength(6)]],
-//       confirmPassword: ['', [Validators.required]],
-//       acceptTerms: [false, [Validators.requiredTrue]]
-//     }, {
-//       validators: this.passwordMatchValidator
-//     });
-
-//     // Listen to role changes to set department validators
-//     this.registerForm.get('role')?.valueChanges.subscribe(role => {
-//       const departmentControl = this.registerForm.get('department');
-      
-//       if (role === UserRole.GovernmentOfficial) {
-//         departmentControl?.setValidators([Validators.required]);
-//       } else {
-//         departmentControl?.clearValidators();
-//         departmentControl?.setValue('');
-//       }
-      
-//       departmentControl?.updateValueAndValidity();
-//     });
-//   }
-
-//   // Custom validator for password match
-//   passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-//     const password = control.get('password');
-//     const confirmPassword = control.get('confirmPassword');
-
-//     if (!password || !confirmPassword) {
-//       return null;
-//     }
-
-//     return password.value === confirmPassword.value ? null : { passwordMismatch: true };
-//   }
-
-//   // Getters for form controls
-//   get fullName() {
-//     return this.registerForm.get('fullName');
-//   }
-
-//   get email() {
-//     return this.registerForm.get('email');
-//   }
-
-//   get phoneNumber() {
-//     return this.registerForm.get('phoneNumber');
-//   }
-
-//   get role() {
-//     return this.registerForm.get('role');
-//   }
-
-//   get department() {
-//     return this.registerForm.get('department');
-//   }
-
-//   get password() {
-//     return this.registerForm.get('password');
-//   }
-
-//   get confirmPassword() {
-//     return this.registerForm.get('confirmPassword');
-//   }
-
-//   get acceptTerms() {
-//     return this.registerForm.get('acceptTerms');
-//   }
-
-//   // Check if passwords match
-//   get passwordsMatch(): boolean {
-//     return !this.registerForm.hasError('passwordMismatch');
-//   }
-
-//   // Check if role is Government Official
-//   get isGovernmentOfficial(): boolean {
-//     return this.role?.value === UserRole.GovernmentOfficial;
-//   }
-
-//   // Toggle password visibility
-//   togglePasswordVisibility(): void {
-//     this.showPassword = !this.showPassword;
-//   }
-
-//   // Toggle confirm password visibility
-//   toggleConfirmPasswordVisibility(): void {
-//     this.showConfirmPassword = !this.showConfirmPassword;
-//   }
-
-//   // Handle form submission
-//   onSubmit(): void {
-//     // Reset messages
-//     this.errorMessage = '';
-//     this.successMessage = '';
-
-//     // Validate form
-//     if (this.registerForm.invalid) {
-//       Object.keys(this.registerForm.controls).forEach(key => {
-//         this.registerForm.get(key)?.markAsTouched();
-//       });
-//       return;
-//     }
-
-//     // Set loading state
-//     this.isLoading = true;
-
-//     // Prepare register data
-//     const registerData: RegisterRequest = {
-//       fullName: this.fullName?.value,
-//       email: this.email?.value,
-//       phoneNumber: this.phoneNumber?.value,
-//       password: this.password?.value,
-//       confirmPassword: this.confirmPassword?.value,
-//       role: this.role?.value,
-//       department: this.isGovernmentOfficial ? this.department?.value : undefined
-//     };
-
-//     // Call auth service
-//     this.authService.register(registerData).subscribe({
-//       next: (response) => {
-//         // Registration successful
-//         this.isLoading = false;
-//         this.successMessage = 'Account created successfully! Redirecting to dashboard...';
-
-//         // Navigate to dashboard after 2 seconds
-//         setTimeout(() => {
-//           this.router.navigate(['/dashboard']);
-//         }, 2000);
-//       },
-//       error: (error) => {
-//         // Registration failed
-//         this.isLoading = false;
-
-//         // Set error message
-//         if (error.error?.message) {
-//           this.errorMessage = error.error.message;
-//         } else if (error.error?.errors) {
-//           // Validation errors from backend
-//           const errors = Object.values(error.error.errors).flat();
-//           this.errorMessage = errors.join(', ');
-//         } else {
-//           this.errorMessage = 'Registration failed. Please try again.';
-//         }
-
-//         console.error('Registration error:', error);
-//       }
-//     });
-//   }
-
-//   // Navigate to home
-//   navigateToHome(): void {
-//     this.router.navigate(['/']);
-//   }
-
-//   // Navigate to login
-//   navigateToLogin(): void {
-//     this.router.navigate(['/auth/login']);
-//   }
-// }
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  FormBuilder, FormGroup, Validators,
+  ReactiveFormsModule, AbstractControl, ValidationErrors
+} from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
-import { UserRole, RegisterRequest } from '../../../core/models/user.model';
+import { RegisterRequest } from '../../../core/models/user.model';
+import { DEPARTMENTS, DEPARTMENT_VALUES, Department } from '../../../core/constants/departments.constants';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.css'],
   encapsulation: ViewEncapsulation.None
 })
 export class RegisterComponent implements OnInit {
+
   registerForm: FormGroup;
   isLoading = false;
   errorMessage = '';
   successMessage = '';
   showPassword = false;
   showConfirmPassword = false;
-
-  // User roles
+  departments: Department[] = DEPARTMENTS;
+  // ── Role options ──────────────────────────────────────────────
+  // value matches backend SignInType enum:
+  //   LocalityMember = 0, GovernmentOfficial = 1
   userRoles = [
-    { value: UserRole.LocalityMember, label: 'Locality Member', description: 'Report civic issues in your area' },
-    { value: UserRole.GovernmentOfficial, label: 'Government Official', description: 'Manage and resolve grievances' }
-  ];
-
-  // Government departments
-  departments = [
-    'Water Works',
-    'Road & Infrastructure',
-    'Garbage Management',
-    'Electricity',
-    'Public Safety',
-    'Parks & Gardens',
-    'Health & Sanitation',
-    'Other'
+    {
+      value: 0,
+      key: 'LocalityMember',
+      label: 'Locality Member',
+      description: 'Report civic issues in your area'
+    },
+    {
+      value: 1,
+      key: 'GovernmentOfficial',
+      label: 'Government Official',
+      description: 'Manage and resolve grievances'
+    }
   ];
 
   constructor(
@@ -265,230 +53,109 @@ export class RegisterComponent implements OnInit {
     this.registerForm = this.fb.group({});
   }
 
-  // ngOnInit(): void {
-  //   // If already logged in, redirect to dashboard
-  //   if (this.authService.isAuthenticated()) {
-  //     this.router.navigate(['/dashboard']);
-  //     return;
-  //   }
-
-  //   // Initialize register form with address field
-  //   this.registerForm = this.fb.group({
-  //     fullName: ['', [Validators.required, Validators.minLength(3)]],
-  //     email: ['', [Validators.required, Validators.email]],
-  //     phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-  //     address: ['', [Validators.required, Validators.minLength(10)]], // ADDED
-  //     role: [UserRole.LocalityMember, [Validators.required]],
-  //     department: [''],
-  //     password: ['', [Validators.required, Validators.minLength(6)]],
-  //     confirmPassword: ['', [Validators.required]],
-  //     acceptTerms: [false, [Validators.requiredTrue]]
-  //   }, {
-  //     validators: this.passwordMatchValidator
-  //   });
-
-  //   // Listen to role changes to set department validators
-  //   this.registerForm.get('role')?.valueChanges.subscribe(role => {
-  //     const departmentControl = this.registerForm.get('department');
-      
-  //     if (role === UserRole.GovernmentOfficial) {
-  //       departmentControl?.setValidators([Validators.required]);
-  //     } else {
-  //       departmentControl?.clearValidators();
-  //       departmentControl?.setValue('');
-  //     }
-      
-  //     departmentControl?.updateValueAndValidity();
-  //   });
-  // }
- ngOnInit(): void {
-  console.log('RegisterComponent initialized');
-  
-  // Clear any corrupted tokens on registration page load
-  const token = sessionStorage.getItem('grievease_token') || localStorage.getItem('grievease_token');
-  if (token === 'undefined' || token === 'null' || token === '') {
-    console.warn('Clearing corrupted token on register page');
-    localStorage.clear();
-    sessionStorage.clear();
-  }
-  
-  // If already logged in, redirect to dashboard
-  if (this.authService.isAuthenticated()) {
-    console.log('User already authenticated, redirecting to dashboard');
-    this.router.navigate(['/dashboard']);
-    return;
-  }
-
-  // Initialize register form with address field
-  this.registerForm = this.fb.group({
-    fullName: ['', [Validators.required, Validators.minLength(3)]],
-    email: ['', [Validators.required, Validators.email]],
-    phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-    address: ['', [Validators.required, Validators.minLength(10)]],
-    role: [UserRole.LocalityMember, [Validators.required]],
-    department: [''],
-    password: ['', [Validators.required, Validators.minLength(6)]],
-    confirmPassword: ['', [Validators.required]],
-    acceptTerms: [false, [Validators.requiredTrue]]
-  }, {
-    validators: this.passwordMatchValidator
-  });
-
-  // Listen to role changes
-  this.registerForm.get('role')?.valueChanges.subscribe(role => {
-    const departmentControl = this.registerForm.get('department');
-    
-    if (role === UserRole.GovernmentOfficial) {
-      departmentControl?.setValidators([Validators.required]);
-    } else {
-      departmentControl?.clearValidators();
-      departmentControl?.setValue('');
-    }
-    
-    departmentControl?.updateValueAndValidity();
-  });
-}
-  // Custom validator for password match
-  passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-    const password = control.get('password');
-    const confirmPassword = control.get('confirmPassword');
-
-    if (!password || !confirmPassword) {
-      return null;
-    }
-
-    return password.value === confirmPassword.value ? null : { passwordMismatch: true };
-  }
-
-  // Getters for form controls
-  get fullName() {
-    return this.registerForm.get('fullName');
-  }
-
-  get email() {
-    return this.registerForm.get('email');
-  }
-
-  get phoneNumber() {
-    return this.registerForm.get('phoneNumber');
-  }
-
-  get address() {
-    return this.registerForm.get('address');
-  }
-
-  get role() {
-    return this.registerForm.get('role');
-  }
-
-  get department() {
-    return this.registerForm.get('department');
-  }
-
-  get password() {
-    return this.registerForm.get('password');
-  }
-
-  get confirmPassword() {
-    return this.registerForm.get('confirmPassword');
-  }
-
-  get acceptTerms() {
-    return this.registerForm.get('acceptTerms');
-  }
-
-  // Check if passwords match
-  get passwordsMatch(): boolean {
-    return !this.registerForm.hasError('passwordMismatch');
-  }
-
-  // Check if role is Government Official
-  get isGovernmentOfficial(): boolean {
-    return this.role?.value === UserRole.GovernmentOfficial;
-  }
-
-  // Toggle password visibility
-  togglePasswordVisibility(): void {
-    this.showPassword = !this.showPassword;
-  }
-
-  // Toggle confirm password visibility
-  toggleConfirmPasswordVisibility(): void {
-    this.showConfirmPassword = !this.showConfirmPassword;
-  }
-
-  // Handle form submission
-  onSubmit(): void {
-    // Reset messages
-    this.errorMessage = '';
-    this.successMessage = '';
-
-    // Validate form
-    if (this.registerForm.invalid) {
-      Object.keys(this.registerForm.controls).forEach(key => {
-        this.registerForm.get(key)?.markAsTouched();
-      });
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
       return;
     }
 
-    // Set loading state
+    this.registerForm = this.fb.group({
+      fullName: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, Validators.email]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      address: ['', [Validators.required, Validators.minLength(10)]],
+      // Default to 0 (LocalityMember)
+      signInType: [0, Validators.required],
+      department: [''],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required],
+      acceptTerms: [false, Validators.requiredTrue]
+    }, { validators: this.passwordMatchValidator });
+    this.signInType!.valueChanges.subscribe((value: number) => {
+      const deptControl = this.registerForm.get('department')!;
+      if (value === 1) {
+        deptControl.setValidators([Validators.required, this.validDepartmentValidator]);
+      } else {
+        deptControl.clearValidators();
+        deptControl.setValue('');
+      }
+      deptControl.updateValueAndValidity();
+    });
+    
+  }
+validDepartmentValidator(ctrl: AbstractControl): ValidationErrors | null {
+    if (!ctrl.value) return null;
+    return DEPARTMENT_VALUES.includes(ctrl.value) ? null : { invalidDepartment: true };
+  }
+
+  // ── Password match validator ──────────────────────────────────
+  passwordMatchValidator(ctrl: AbstractControl): ValidationErrors | null {
+    const pw = ctrl.get('password');
+    const cpw = ctrl.get('confirmPassword');
+    if (!pw || !cpw) return null;
+    return pw.value === cpw.value ? null : { passwordMismatch: true };
+  }
+
+  // ── Getters ───────────────────────────────────────────────────
+  get fullName() { return this.registerForm.get('fullName'); }
+  get email() { return this.registerForm.get('email'); }
+  get phoneNumber() { return this.registerForm.get('phoneNumber'); }
+  get address() { return this.registerForm.get('address'); }
+  get signInType() { return this.registerForm.get('signInType'); }
+  get department()      { return this.registerForm.get('department'); }
+  get password() { return this.registerForm.get('password'); }
+  get confirmPassword() { return this.registerForm.get('confirmPassword'); }
+  get acceptTerms() { return this.registerForm.get('acceptTerms'); }
+  get passwordsMatch(): boolean { return !this.registerForm.hasError('passwordMismatch'); }
+
+  get isGovernmentOfficial(): boolean {
+    return this.signInType?.value === 1;
+  }
+
+  togglePasswordVisibility(): void { this.showPassword = !this.showPassword; }
+  toggleConfirmPasswordVisibility(): void { this.showConfirmPassword = !this.showConfirmPassword; }
+
+  // ── Submit ────────────────────────────────────────────────────
+  onSubmit(): void {
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    if (this.registerForm.invalid) {
+      Object.keys(this.registerForm.controls).forEach(k =>
+        this.registerForm.get(k)?.markAsTouched()
+      );
+      return;
+    }
+
     this.isLoading = true;
 
-    // Prepare register data - FIXED MAPPING
-    const registerData: RegisterRequest = {
-      name: this.fullName?.value,           // Changed from fullName to name
+    // ── KEY FIX ────────────────────────────────────────────────
+    // Old code sent: { role: 'LocalityMember' }  ← string, wrong field name
+    // Fix sends:    { signInType: 0 }             ← integer matching C# enum
+    const payload: RegisterRequest = {
+      name: this.fullName?.value,
       email: this.email?.value,
       phoneNumber: this.phoneNumber?.value,
-      address: this.address?.value,         // ADDED
+      address: this.address?.value,
       password: this.password?.value,
       confirmPassword: this.confirmPassword?.value,
-      role: this.role?.value,
-      department: this.isGovernmentOfficial ? this.department?.value : undefined
+      signInType: this.signInType?.value  , // 0 or 1
+      department:      this.isGovernmentOfficial ? this.department?.value : undefined
     };
 
-    console.log('Submitting registration:', registerData);
-
-    // Call auth service
-    this.authService.register(registerData).subscribe({
-      next: (response) => {
-        // Registration successful
+    this.authService.register(payload).subscribe({
+      next: () => {
         this.isLoading = false;
-        this.successMessage = 'Account created successfully! Redirecting to dashboard...';
-
-        console.log('Registration successful:', response);
-
-        // Navigate to dashboard after 2 seconds
-        setTimeout(() => {
-          this.router.navigate(['/dashboard']);
-        }, 2000);
+        this.successMessage = 'Account created! Redirecting to dashboard...';
+        setTimeout(() => this.router.navigate(['/dashboard']), 1500);
       },
-      error: (error) => {
-        // Registration failed
+      error: (err) => {
         this.isLoading = false;
-
-        // Set error message
-        if (error.error?.message) {
-          this.errorMessage = error.error.message;
-        } else if (error.error?.errors) {
-          // Validation errors from backend
-          const errors = Object.values(error.error.errors).flat();
-          this.errorMessage = errors.join(', ');
-        } else {
-          this.errorMessage = 'Registration failed. Please try again.';
-        }
-
-        console.error('Registration error:', error);
+        this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
       }
     });
   }
 
-  // Navigate to home
-  navigateToHome(): void {
-    this.router.navigate(['/']);
-  }
-
-  // Navigate to login
-  navigateToLogin(): void {
-    this.router.navigate(['/auth/login']);
-  }
+  navigateToHome(): void { this.router.navigate(['/']); }
+  navigateToLogin(): void { this.router.navigate(['/auth/login']); }
 }

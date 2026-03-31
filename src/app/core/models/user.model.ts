@@ -7,7 +7,7 @@ export interface User {
   email: string;
   phoneNumber: string;
   address:string;
-  role: UserRole;
+  signInType: 'LocalityMember' | 'GovernmentOfficial';
   department?: string;
   profilePictureUrl?: string;
   isEmailVerified: boolean;
@@ -19,11 +19,10 @@ export interface User {
 /**
  * User Role Enum
  */
-export enum UserRole {
-  LocalityMember = 'LocalityMember',
-  GovernmentOfficial = 'GovernmentOfficial',
-  Admin = 'Admin'
-}
+// export enum UserRole {
+//   LocalityMember = 0,
+//   GovernmentOfficial = 1
+// }
 
 /**
  * Login Request DTO
@@ -43,7 +42,7 @@ export interface RegisterRequest {
   address:string;
   password: string;
   confirmPassword: string;
-  role: UserRole;
+  signInType: 0|1;
   department?: string;
 }
 

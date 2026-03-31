@@ -50,7 +50,7 @@ export class OverviewComponent implements OnInit {
   }
 
   get isOfficial(): boolean {
-    return this.authService.currentUserValue?.role === 'GovernmentOfficial';
+    return this.authService.currentUserValue?.signInType === 'GovernmentOfficial';
   }
 
   get greeting(): string {

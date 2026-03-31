@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { TokenService } from './token.service';
-import { User, AuthResponse, LoginRequest, RegisterRequest, UserRole } from '../models/user.model';
+import { User, AuthResponse, LoginRequest, RegisterRequest } from '../models/user.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({                                     //service decorations creating a global instance 
@@ -170,38 +170,38 @@ register(registerData: RegisterRequest): Observable<AuthResponse> {
   /**
    * Get current user's role
    */
-  getUserRole(): UserRole | null {
-    const user = this.currentUserValue;
-    return user ? user.role : null;
-  }
+  // getUserRole(): UserRole | null {
+  //   const user = this.currentUserValue;
+  //   return user ? user.role : null;
+  // }
 
-  /**
-   * Check if user has specific role
-   */
-  hasRole(role: UserRole): boolean {
-    const userRole = this.getUserRole();
-    return userRole === role;
-  }
+  // /**
+  //  * Check if user has specific role
+  //  */
+  // hasRole(role: UserRole): boolean {
+  //   const userRole = this.getUserRole();
+  //   return userRole === role;
+  // }
 
-  /**
-   * Check if user is admin
-   */
-  isAdmin(): boolean {
-    return this.hasRole(UserRole.Admin);
-  }
+  // /**
+  //  * Check if user is admin
+  //  */
+  // isAdmin(): boolean {
+  //   return this.hasRole(UserRole.Admin);
+  // }
 
   /**
    * Check if user is government official
    */
   isGovernmentOfficial(): boolean {
-    return this.hasRole(UserRole.GovernmentOfficial);
+    return this.currentUserValue?.signInType === 'GovernmentOfficial';
   }
 
   /**
    * Check if user is locality member
    */
   isLocalityMember(): boolean {
-    return this.hasRole(UserRole.LocalityMember);
+    return this.currentUserValue?.signInType === 'LocalityMember'
   }
 
   /**

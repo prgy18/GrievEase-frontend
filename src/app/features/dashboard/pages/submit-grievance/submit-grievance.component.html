@@ -424,7 +424,7 @@
                   class="dept-pill"
                   *ngIf="form.get('department')?.value"
                 >
-                  <i class="fas {{ deptConfig[form.get('department')?.value]?.icon }}"></i>
+                  <i class="fas {{ deptConfig[form.get('department')?.value].icon }}"></i>
                   {{ form.get('department')?.value }}
                 </span>
                 <span *ngIf="!form.get('department')?.value">—</span>
