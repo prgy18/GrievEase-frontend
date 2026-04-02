@@ -1,4 +1,3 @@
-
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -137,31 +136,31 @@ export class SubmitGrievanceComponent implements OnInit {
     // Clear old values while loading
     this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
 
+    // ── Route through our own backend to avoid CORS / firewall issues
+    // with the third-party postalpincode.in API. The backend proxies
+    // the request server-side and returns the same JSON response.
     this.http
-      .get<PostalApiResponse[]>(`https://api.postalpincode.in/pincode/${pin}`)
+      .get<PostalApiResponse[]>(`${environment.apiUrl}/Grievance/pincode/${pin}`)
       .subscribe({
         next: (res) => {
           const result = res[0];
           if (result.Status === 'Success' && result.PostOffice?.length) {
             const po = result.PostOffice[0];
-            // District is the closest to "city" in Indian postal data
-            const city = po.District || po.Block || po.Name;
+            const city  = po.District || po.Block || po.Name;
             const state = po.State;
 
             this.form.patchValue({ city, state }, { emitEvent: false });
-            this.pincodeStatus = 'success';
+            this.pincodeStatus  = 'success';
             this.pincodeMessage = `${city}, ${state}`;
           } else {
-            this.pincodeStatus = 'error';
+            this.pincodeStatus  = 'error';
             this.pincodeMessage = 'Pincode not found. Please enter city & state manually.';
-            // Enable manual input on error
-            this.form.get('city')?.enable();
-            this.form.get('state')?.enable();
           }
         },
         error: () => {
-          this.pincodeStatus = 'error';
-          this.pincodeMessage = 'Could not fetch pincode data. Enter city & state manually.';
+          // Fallback: let the user type manually — don't block the form
+          this.pincodeStatus  = 'error';
+          this.pincodeMessage = 'Auto-fill unavailable. Please enter city & state manually.';
         }
       });
   }
@@ -261,7 +260,7 @@ export class SubmitGrievanceComponent implements OnInit {
         this.isSubmitting = false;
         this.submitSuccess = true;
         // Navigate to my grievances after 2 seconds
-        setTimeout(() => this.router.navigate(['/dashboard/my-grievances']), 2000);
+        setTimeout(() => this.router.navigate(['/dashboard/overview']), 2000);
       },
       error: (err) => {
         this.isSubmitting = false;

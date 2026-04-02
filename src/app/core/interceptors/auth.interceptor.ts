@@ -1,35 +1,39 @@
-// ─────────────────────────────────────────────────────────────
-// auth.interceptor.ts
-// Automatically attaches the Bearer JWT token to every outgoing
-// HTTP request. Without this, every service and component would
-// need to manually build HttpHeaders — this eliminates that.
-//
-// Angular 19 uses functional interceptors (HttpInterceptorFn)
-// instead of class-based ones. Register it in app.config.ts.
-// ─────────────────────────────────────────────────────────────
-
 import { HttpInterceptorFn, HttpRequest, HttpHandlerFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { TokenService } from '../services/token.service';
+
+// ── URLs that must NOT receive the Authorization header ──────────
+// Cloudinary rejects requests that include Authorization in the
+// CORS preflight — causes ERR_FAILED with CORS policy block.
+// Add any other external APIs called directly from the frontend here.
+const PUBLIC_URL_PREFIXES = [
+  'https://api.cloudinary.com',
+  'https://api.postalpincode.in',
+];
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ) => {
+  // ── Skip token for external/public URLs ───────────────────────
+  const isPublicUrl = PUBLIC_URL_PREFIXES.some(prefix =>
+    req.url.startsWith(prefix)
+  );
+
+  if (isPublicUrl) {
+    return next(req);   // pass through untouched — no Authorization header
+  }
+
+  // ── Attach Bearer token for our own backend API calls ─────────
   const tokenService = inject(TokenService);
   const token = tokenService.getToken();
 
-  // Only attach token if one exists and is not expired
   if (token && !tokenService.isTokenExpired(token)) {
     const authReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`
-      }
+      setHeaders: { Authorization: `Bearer ${token}` }
     });
     return next(authReq);
   }
 
-  // No token or expired — pass request through unchanged
-  // The backend will return 401 and the error interceptor handles it
   return next(req);
 };
