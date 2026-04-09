@@ -1,143 +1,138 @@
-// ─────────────────────────────────────────────────────────────
-// grievance.model.ts
-// Mirrors the backend DTOs exactly:
-//   GrievanceResponseDto, CreateGrievanceDto, UpdateGrievanceDto,
-//   UpdateStatusDto, StatisticsDto, PaginatedResponse<T>
-// ─────────────────────────────────────────────────────────────
-
-// ── Matches backend GrievanceResponseDto ──────────────────────
 export interface Grievance {
-  id: string;
-  userId: string;
-  userName: string;
+  id:         string;
+  userId:     string;
+  userName:   string;
 
-  name: string;
-  street: string;
-  locality: string;
-  city: string;
-  state: string;
-  department: string;
+  name:        string;
+  street:      string;
+  locality:    string;
+  city:        string;
+  state:       string;
+  pincode:     string;
+  department:  string;
   description: string;
   phoneNumber: string;
 
-  imageUrl: string;
-  imagePublicId: string;
-  solvedImageUrl: string | null;
+  imageUrl:            string;
+  imagePublicId:       string;
+  solvedImageUrl:      string | null;
   solvedImagePublicId: string | null;
 
-  upvotes: number;
-  status: GrievanceStatus;
-  priority: GrievancePriority;
+  upvotes:    number;
+  status:     GrievanceStatus;
+  priority:   GrievancePriority;
+  hasUpvoted: boolean;
 
-  hasUpvoted: boolean;   // Did the current logged-in user upvote this?
+  // Rejection fields — set when citizen rejects the resolution
+  wasRejected?:     boolean;
+  rejectionReason?: string | null;
 
-  createdAt: string;     // ISO date string from backend
+  createdAt: string;
   updatedAt: string;
-  solvedOn: string | null;
+  solvedOn:  string | null;
 }
 
-// ── Status & Priority enums matching backend constants ─────────
-// Backend: "pending" | "in process" | "solved"
-export type GrievanceStatus = 'pending' | 'in process' | 'solved';
+// 4 statuses now
+export type GrievanceStatus =
+  'pending' | 'in process' | 'awaiting approval' | 'solved';
 
-// Backend default is "medium"
 export type GrievancePriority = 'low' | 'medium' | 'high';
 
-// ── Matches backend CreateGrievanceDto ─────────────────────────
 export interface CreateGrievanceRequest {
-  name: string;
-  street: string;
-  locality: string;
-  city: string;
-  state: string;
-  department: string;
-  description: string;
-  phoneNumber: string;
-  imageUrl: string;       // Cloudinary URL — uploaded before calling API
-  imagePublicId: string;  // Cloudinary public ID
+  name:         string;
+  street:       string;
+  locality:     string;
+  city:         string;
+  state:        string;
+  pincode:      string;
+  department:   string;
+  description:  string;
+  phoneNumber:  string;
+  imageUrl:     string;
+  imagePublicId: string;
 }
 
-// ── Matches backend UpdateGrievanceDto (all fields optional) ───
 export interface UpdateGrievanceRequest {
-  name?: string;
-  street?: string;
-  locality?: string;
-  city?: string;
-  state?: string;
-  department?: string;
+  name?:        string;
+  street?:      string;
+  locality?:    string;
+  city?:        string;
+  state?:       string;
+  department?:  string;
   description?: string;
   phoneNumber?: string;
 }
 
-// ── Matches backend UpdateStatusDto ───────────────────────────
+// Used by official for pending → in process only
 export interface UpdateStatusRequest {
   status: GrievanceStatus;
-  solvedImageUrl?: string;      // Optional — only when marking as solved
+}
+
+// Official sends for citizen approval (in process → awaiting approval)
+export interface RequestApprovalRequest {
+  solvedImageUrl:       string;
   solvedImagePublicId?: string;
 }
 
-// ── Matches backend StatisticsDto ─────────────────────────────
+// Citizen rejects with mandatory reason (awaiting approval → pending)
+export interface RejectResolutionRequest {
+  reason: string;
+}
+
 export interface Statistics {
-  totalGrievances: number;
-  pendingGrievances: number;
+  totalGrievances:     number;
+  pendingGrievances:   number;
   inProcessGrievances: number;
-  solvedGrievances: number;
+  solvedGrievances:    number;
   averageResolutionDays: number;
   departmentWiseStats: DepartmentStats[];
-  topLocalities: LocalityStats[];
+  topLocalities:       LocalityStats[];
+  myDepartment?:       DepartmentStats;
 }
 
 export interface DepartmentStats {
   department: string;
-  total: number;
-  pending: number;
-  inProcess: number;
-  solved: number;
+  total:      number;
+  pending:    number;
+  inProcess:  number;
+  solved:     number;
 }
 
 export interface LocalityStats {
-  locality: string;
-  totalGrievances: number;
+  locality:         string;
+  totalGrievances:  number;
   solvedGrievances: number;
 }
 
-// ── Matches backend PaginatedResponse<T> ──────────────────────
-export interface PaginatedResponse<T> {
-  data: T[];
-  pageNumber: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPreviousPage: boolean;
+export interface GrievanceFilters {
+  pageNumber?: number;
+  pageSize?:   number;
+  department?: string;
+  status?:     GrievanceStatus;
+  locality?:   string;
+  pincode?:    string;
+  city?:       string;
+  name?:       string;  // filter by submitter name
+  sortBy?:     'recent' | 'upvotes' | 'oldest';
 }
 
-// ── Matches backend ApiResponse<T> wrapper ────────────────────
+export interface PaginatedResponse<T> {
+  data:         T[];
+  pageNumber:   number;
+  pageSize:     number;
+  totalRecords: number;
+  totalPages:   number;
+}
+
+export const DEPARTMENTS = [
+  'Water-Works', 'Roadways', 'Electricity',
+  'Sanitation', 'Street-Lights', 'Drainage'
+];
+
+// Re-export ApiResponse here so grievance components can import it
 export interface ApiResponse<T> {
   success: boolean;
   message: string;
-  data: T;
-  errors: string[] | null;
+  data:    T;
+  errors:  string[] | null;
 }
-
-// ── Query params for GET /api/grievance ───────────────────────
-export interface GrievanceFilters {
-  pageNumber?: number;
-  pageSize?: number;
-  department?: string;
-  status?: GrievanceStatus;
-  locality?: string;
-  sortBy?: 'recent' | 'upvotes' | 'oldest';
-}
-
-// ── Valid department values matching backend Departments.cs ────
-export const DEPARTMENTS = [
-  'Water-Works',
-  'Roadways',
-  'Electricity',
-  'Sanitation',
-  'Street-Lights',
-  'Drainage'
-] as const;
-
-export type Department = typeof DEPARTMENTS[number];

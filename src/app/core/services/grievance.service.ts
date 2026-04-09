@@ -8,42 +8,39 @@ import {
   CreateGrievanceRequest,
   UpdateGrievanceRequest,
   UpdateStatusRequest,
+  RequestApprovalRequest,
+  RejectResolutionRequest,
   Statistics,
   PaginatedResponse,
   ApiResponse,
   GrievanceFilters
 } from '../models/grievance.model';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class GrievanceService {
 
   private readonly BASE = `${environment.apiUrl}/grievance`;
 
-  // The auth interceptor (built next) automatically attaches
-  // the Bearer token to every request — no manual headers needed.
   constructor(private http: HttpClient) {}
 
-  // ── GET all grievances with optional filters ───────────────
-  // Calls: GET /api/grievance?pageNumber=1&pageSize=10&...
+  // ── GET all grievances ─────────────────────────────────────
   getAll(filters: GrievanceFilters = {}): Observable<PaginatedResponse<Grievance>> {
     let params = new HttpParams();
-
     if (filters.pageNumber) params = params.set('pageNumber', filters.pageNumber);
-    if (filters.pageSize)   params = params.set('pageSize', filters.pageSize);
+    if (filters.pageSize)   params = params.set('pageSize',   filters.pageSize);
     if (filters.department) params = params.set('department', filters.department);
-    if (filters.status)     params = params.set('status', filters.status);
-    if (filters.locality)   params = params.set('locality', filters.locality);
-    if (filters.sortBy)     params = params.set('sortBy', filters.sortBy);
-
+    if (filters.status)     params = params.set('status',     filters.status);
+    if (filters.locality)   params = params.set('locality',   filters.locality);
+    if (filters.pincode)    params = params.set('pincode',    filters.pincode);
+    if (filters.city)       params = params.set('city',       filters.city);
+    if (filters.name)       params = params.set('name',       filters.name);
+    if (filters.sortBy)     params = params.set('sortBy',     filters.sortBy);
     return this.http
       .get<ApiResponse<PaginatedResponse<Grievance>>>(this.BASE, { params })
       .pipe(map(res => res.data));
   }
 
-  // ── GET single grievance by ID ─────────────────────────────
-  // Calls: GET /api/grievance/:id
+  // ── GET single grievance ───────────────────────────────────
   getById(id: string): Observable<Grievance> {
     return this.http
       .get<ApiResponse<Grievance>>(`${this.BASE}/${id}`)
@@ -51,35 +48,30 @@ export class GrievanceService {
   }
 
   // ── GET current user's own grievances ──────────────────────
-  // Calls: GET /api/grievance/my-grievances
   getMine(pageNumber = 1, pageSize = 10): Observable<PaginatedResponse<Grievance>> {
     const params = new HttpParams()
       .set('pageNumber', pageNumber)
-      .set('pageSize', pageSize);
-
+      .set('pageSize',   pageSize);
     return this.http
       .get<ApiResponse<PaginatedResponse<Grievance>>>(`${this.BASE}/my-grievances`, { params })
       .pipe(map(res => res.data));
   }
 
-  // ── POST create new grievance ──────────────────────────────
-  // Calls: POST /api/grievance
+  // ── POST create ────────────────────────────────────────────
   create(payload: CreateGrievanceRequest): Observable<Grievance> {
     return this.http
       .post<ApiResponse<Grievance>>(this.BASE, payload)
       .pipe(map(res => res.data));
   }
 
-  // ── PUT update grievance details (creator only) ────────────
-  // Calls: PUT /api/grievance/:id
+  // ── PUT update details ─────────────────────────────────────
   update(id: string, payload: UpdateGrievanceRequest): Observable<Grievance> {
     return this.http
       .put<ApiResponse<Grievance>>(`${this.BASE}/${id}`, payload)
       .pipe(map(res => res.data));
   }
 
-  // ── DELETE grievance (creator only, pending status only) ───
-  // Calls: DELETE /api/grievance/:id
+  // ── DELETE ─────────────────────────────────────────────────
   delete(id: string): Observable<void> {
     return this.http
       .delete<ApiResponse<null>>(`${this.BASE}/${id}`)
@@ -87,49 +79,43 @@ export class GrievanceService {
   }
 
   // ── PUT toggle upvote ──────────────────────────────────────
-  // Calls: PUT /api/grievance/:id/upvote
-  // Returns updated grievance with new upvote count + hasUpvoted
   toggleUpvote(id: string): Observable<Grievance> {
     return this.http
       .put<ApiResponse<Grievance>>(`${this.BASE}/${id}/upvote`, {})
       .pipe(map(res => res.data));
   }
 
-  // ── PUT update status (government official only) ───────────
-  // Calls: PUT /api/grievance/:id/status
+  // ── PUT update status (official: pending → in process only) ─
   updateStatus(id: string, payload: UpdateStatusRequest): Observable<Grievance> {
     return this.http
       .put<ApiResponse<Grievance>>(`${this.BASE}/${id}/status`, payload)
       .pipe(map(res => res.data));
   }
 
-  // ── GET search grievances by keyword ──────────────────────
-  // Calls: GET /api/grievance/search?query=pothole
-  search(query: string, pageNumber = 1, pageSize = 10): Observable<PaginatedResponse<Grievance>> {
-    const params = new HttpParams()
-      .set('query', query)
-      .set('pageNumber', pageNumber)
-      .set('pageSize', pageSize);
-
+  // ── PUT request approval (official: in process → awaiting approval)
+  // Requires solved proof photo
+  requestApproval(id: string, payload: RequestApprovalRequest): Observable<Grievance> {
     return this.http
-      .get<ApiResponse<PaginatedResponse<Grievance>>>(`${this.BASE}/search`, { params })
+      .put<ApiResponse<Grievance>>(`${this.BASE}/${id}/request-approval`, payload)
       .pipe(map(res => res.data));
   }
 
-  // ── GET solved grievances ──────────────────────────────────
-  // Calls: GET /api/grievance/solved
-  getSolved(pageNumber = 1, pageSize = 10): Observable<PaginatedResponse<Grievance>> {
-    const params = new HttpParams()
-      .set('pageNumber', pageNumber)
-      .set('pageSize', pageSize);
-
+  // ── PUT approve resolution (citizen: awaiting approval → solved)
+  approveResolution(id: string): Observable<Grievance> {
     return this.http
-      .get<ApiResponse<PaginatedResponse<Grievance>>>(`${this.BASE}/solved`, { params })
+      .put<ApiResponse<Grievance>>(`${this.BASE}/${id}/approve`, {})
       .pipe(map(res => res.data));
   }
 
-  // ── GET platform statistics (government official only) ─────
-  // Calls: GET /api/grievance/stats
+  // ── PUT reject resolution (citizen: awaiting approval → pending)
+  // Requires mandatory rejection reason
+  rejectResolution(id: string, payload: RejectResolutionRequest): Observable<Grievance> {
+    return this.http
+      .put<ApiResponse<Grievance>>(`${this.BASE}/${id}/reject`, payload)
+      .pipe(map(res => res.data));
+  }
+
+  // ── GET statistics (official only) ────────────────────────
   getStatistics(): Observable<Statistics> {
     return this.http
       .get<ApiResponse<Statistics>>(`${this.BASE}/stats`)

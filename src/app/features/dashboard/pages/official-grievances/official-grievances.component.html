@@ -1,0 +1,410 @@
+<!-- Loading -->
+<div class="og-loading" *ngIf="isLoading">
+  <div class="og-sk-grid">
+    <div class="og-sk-card" *ngFor="let x of [1,2,3,4,5,6]">
+      <div class="og-sk-bar"></div>
+      <div class="og-sk-body">
+        <div class="og-sk-line og-sk-line--short"></div>
+        <div class="og-sk-line"></div>
+        <div class="og-sk-line og-sk-line--long"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error -->
+<div class="og-error" *ngIf="errorMessage && !isLoading">
+  <i class="fas fa-exclamation-circle"></i>
+  <span>{{ errorMessage }}</span>
+  <button (click)="load()"><i class="fas fa-redo"></i> Retry</button>
+</div>
+
+<!-- Main -->
+<div class="og-wrap" *ngIf="!isLoading && !errorMessage">
+
+  <!-- Hero -->
+  <div class="og-hero" [class]="config.accentClass">
+    <div class="og-hero-text">
+      <div class="og-dept-pill">
+        <i class="fas fa-building"></i> {{ deptName }}
+      </div>
+      <h1 class="og-title">
+        <i class="fas {{ config.icon }}"></i>
+        {{ config.title }}
+      </h1>
+      <p class="og-sub">{{ config.sub }}</p>
+    </div>
+    <div class="og-hero-chips">
+      <div class="og-chip">
+        <span class="og-chip-num">{{ totalRecords }}</span>
+        <span class="og-chip-lbl">{{ mode === 'all' ? 'Total' : mode === 'pending' ? 'Pending' : 'In Process' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="og-toolbar">
+    <div class="og-search-wrap">
+      <i class="fas fa-search"></i>
+      <input class="og-search" type="text"
+        placeholder="Search by description, locality, citizen..."
+        [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+      <button *ngIf="searchQuery" (click)="searchQuery=''; onSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Status filter — only in "all" mode -->
+    <select *ngIf="mode === 'all'" class="og-select"
+      [(ngModel)]="statusFilter" (ngModelChange)="onStatusFilter()">
+      <option value="">All Statuses</option>
+      <option value="pending">Pending</option>
+      <option value="in process">In Process</option>
+      <option value="solved">Solved</option>
+    </select>
+
+    <div class="og-sort">
+      <button class="og-sort-btn"
+        *ngFor="let s of sortOptions"
+        [class.og-sort-btn--active]="sortBy === s.key"
+        (click)="onSort(s.key)">
+        <i class="fas {{ s.icon }}"></i>{{ s.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div class="og-empty" *ngIf="filtered.length === 0">
+    <div class="og-empty-icon"><i class="fas fa-clipboard-check"></i></div>
+    <h3>No grievances found</h3>
+    <p>{{ searchQuery ? 'Try different keywords' : 'No grievances match the current filter' }}</p>
+  </div>
+
+  <!-- Grid -->
+  <div class="og-grid" *ngIf="filtered.length > 0">
+    <div class="og-card"
+      *ngFor="let g of filtered; trackBy: trackById; let i = index"
+      [class.og-card--success]="updateSuccess === g.id"
+      [style.animation-delay]="i * 50 + 'ms'"
+      (click)="openModal(g)">
+
+      <!-- Status accent bar -->
+      <div class="og-card-bar"
+        [class.bar--pending]="g.status === 'pending'"
+        [class.bar--process]="g.status === 'in process'"
+        [class.bar--solved]="g.status === 'solved'">
+      </div>
+
+      <!-- Card head -->
+      <div class="og-card-head">
+        <span class="og-dept-badge">
+          <i class="fas {{ deptIcon(g.department) }}"></i>
+          {{ g.department }}
+        </span>
+        <span class="og-status-pill"
+          [class.pill--pending]="g.status === 'pending'"
+          [class.pill--process]="g.status === 'in process'"
+          [class.pill--awaiting]="g.status === 'awaiting approval'"
+          [class.pill--solved]="g.status === 'solved'">
+          <span class="pill-dot"></span>{{ g.status }}
+        </span>
+      </div>
+
+      <!-- Description -->
+      <p class="og-card-desc">
+        {{ g.description.length > 90 ? (g.description | slice:0:90) + '…' : g.description }}
+      </p>
+
+      <!-- Meta -->
+      <div class="og-card-meta">
+        <span><i class="fas fa-map-marker-alt"></i> {{ g.locality }}, {{ g.city }}</span>
+        <span><i class="fas fa-user"></i> {{ g.userName }}</span>
+        <span><i class="fas fa-thumbs-up"></i> {{ g.upvotes }}</span>
+        <span class="og-card-date">{{ daysAgo(g.createdAt) }}</span>
+      </div>
+
+      <!-- Action row -->
+      <div class="og-card-action" *ngIf="actionLabel(g)" (click)="$event.stopPropagation()">
+
+        <!-- Default action button -->
+        <ng-container *ngIf="confirmingId !== g.id && updateSuccess !== g.id">
+          <button class="og-action-btn"
+            [class.og-action-btn--process]="g.status === 'pending'"
+            [class.og-action-btn--solved]="g.status === 'in process'"
+            (click)="requestConfirm(g.id, g, $event)">
+            <i class="fas" [class.fa-arrow-right]="g.status === 'pending'"
+               [class.fa-check]="g.status === 'in process'"></i>
+            {{ actionLabel(g) }}
+          </button>
+        </ng-container>
+
+        <!-- Confirm: In Process (simple) -->
+        <ng-container *ngIf="confirmingId === g.id && g.status === 'pending'">
+          <span class="og-confirm-text">Mark as In Process?</span>
+          <button class="og-confirm-yes" [disabled]="isUpdating"
+            (click)="confirmUpdate(g, $event)">
+            <i class="fas fa-spinner fa-spin" *ngIf="isUpdating"></i>
+            <i class="fas fa-check" *ngIf="!isUpdating"></i> Yes
+          </button>
+          <button class="og-confirm-no" (click)="cancelConfirm($event)">Cancel</button>
+        </ng-container>
+
+        <!-- Confirm: Solved — with optional image upload -->
+        <ng-container *ngIf="confirmingId === g.id && g.status === 'in process'">
+          <div class="og-solved-upload-row">
+            <span class="og-confirm-text">Mark as Solved?</span>
+            <!-- Upload proof photo -->
+            <label class="og-upload-label" [class.og-upload-label--done]="solvedUploadStatus === 'done'">
+              <i class="fas" [class.fa-camera]="solvedUploadStatus === 'idle' || solvedUploadStatus === 'error'"
+                 [class.fa-spinner]="solvedUploadStatus === 'uploading'"
+                 [class.fa-spin]="solvedUploadStatus === 'uploading'"
+                 [class.fa-check-circle]="solvedUploadStatus === 'done'"></i>
+              {{ solvedUploadStatus === 'idle' ? 'Add proof photo *' :
+                 solvedUploadStatus === 'uploading' ? 'Uploading...' :
+                 solvedUploadStatus === 'done' ? 'Photo added ✓' : 'Retry upload' }}
+
+              <input type="file" accept="image/*" style="display:none"
+                (change)="onSolvedImagePick($event)" (click)="$event.stopPropagation()" />
+            </label>
+            <button class="og-confirm-yes"
+              [disabled]="isUpdating || !canConfirmUpdate"
+              [title]="!canConfirmUpdate ? 'Please upload a proof photo first' : ''"
+              (click)="confirmUpdate(g, $event)">
+              <i class="fas fa-spinner fa-spin" *ngIf="isUpdating"></i>
+              <i class="fas fa-check" *ngIf="!isUpdating"></i> Confirm
+            </button>
+            <button class="og-confirm-no" (click)="cancelConfirm($event)">Cancel</button>
+          </div>
+        </ng-container>
+
+        <!-- Success flash -->
+        <ng-container *ngIf="updateSuccess === g.id">
+          <span class="og-success-flash">
+            <i class="fas fa-check-circle"></i> Status updated
+          </span>
+        </ng-container>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="og-pagination" *ngIf="totalPages > 1">
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(1)"><i class="fas fa-angle-double-left"></i></button>
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)"><i class="fas fa-chevron-left"></i></button>
+    <button class="pg-btn" *ngFor="let p of pageNumbers" [class.pg-active]="p === currentPage" (click)="changePage(p)">{{ p }}</button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)"><i class="fas fa-chevron-right"></i></button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)"><i class="fas fa-angle-double-right"></i></button>
+    <span class="pg-info">Page {{ currentPage }} of {{ totalPages }}</span>
+  </div>
+
+</div>
+
+<!-- ═══ MODAL ═══════════════════════════════════════════════════ -->
+<div class="og-modal-overlay" [class.og-modal-overlay--open]="modalOpen" (click)="closeModal()"></div>
+
+<div class="og-modal" [class.og-modal--open]="modalOpen"
+  *ngIf="selectedGrievance" (click)="$event.stopPropagation()">
+
+  <!-- Header -->
+  <div class="og-modal-head">
+    <div class="og-modal-head-left">
+      <div class="og-modal-icon">
+        <i class="fas {{ deptIcon(selectedGrievance.department) }}"></i>
+      </div>
+      <div>
+        <div class="og-modal-dept">{{ selectedGrievance.department }}</div>
+        <div class="og-modal-meta">
+          <span><i class="fas fa-user"></i> {{ selectedGrievance.userName }}</span>
+          <span><i class="fas fa-calendar-alt"></i> {{ formatDate(selectedGrievance.createdAt) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="og-modal-head-right">
+      <span class="og-status-pill og-status-pill--lg"
+        [class.pill--pending]="selectedGrievance.status === 'pending'"
+        [class.pill--process]="selectedGrievance.status === 'in process'"
+        [class.pill--awaiting]="selectedGrievance.status === 'awaiting approval'"
+        [class.pill--solved]="selectedGrievance.status === 'solved'">
+        <span class="pill-dot"></span>{{ selectedGrievance.status }}
+      </span>
+      <button class="og-modal-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="og-modal-timeline">
+    <div class="ptl-step" [class.ptl-step--done]="true">
+      <div class="ptl-icon ptl-icon--done"><i class="fas fa-file-alt"></i></div>
+      <div class="ptl-label">Filed</div>
+      <div class="ptl-date">{{ formatDate(selectedGrievance.createdAt) }}</div>
+    </div>
+    <div class="ptl-step"
+      [class.ptl-step--done]="selectedGrievance.status === 'in process' || selectedGrievance.status === 'solved'"
+      [class.ptl-step--active]="selectedGrievance.status === 'pending'">
+      <div class="ptl-icon"
+        [class.ptl-icon--done]="selectedGrievance.status === 'in process' || selectedGrievance.status === 'solved'"
+        [class.ptl-icon--pending]="selectedGrievance.status === 'pending'">
+        <i class="fas fa-cog"></i>
+      </div>
+      <div class="ptl-label">In Progress</div>
+      <div class="ptl-date">—</div>
+    </div>
+    <div class="ptl-step"
+      [class.ptl-step--done]="selectedGrievance.status === 'solved'">
+      <div class="ptl-icon"
+        [class.ptl-icon--done]="selectedGrievance.status === 'solved'"
+        [class.ptl-icon--empty]="selectedGrievance.status !== 'solved'">
+        <i class="fas fa-check"></i>
+      </div>
+      <div class="ptl-label">Resolved</div>
+      <div class="ptl-date">{{ selectedGrievance.status === 'solved' ? formatDate(selectedGrievance.updatedAt ?? selectedGrievance.createdAt) : '—' }}</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="og-modal-body">
+    <div class="og-modal-col">
+
+      <div class="msec">
+        <div class="msec-lbl">Description</div>
+        <p class="msec-val msec-val--desc">{{ selectedGrievance.description }}</p>
+      </div>
+
+      <div class="msec">
+        <div class="msec-lbl">Location</div>
+        <div class="loc-grid">
+          <div class="loc-cell"><span class="lk">Street</span><span class="lv">{{ selectedGrievance.street }}</span></div>
+          <div class="loc-cell"><span class="lk">Locality</span><span class="lv">{{ selectedGrievance.locality }}</span></div>
+          <div class="loc-cell"><span class="lk">City</span><span class="lv">{{ selectedGrievance.city }}</span></div>
+          <div class="loc-cell"><span class="lk">State</span><span class="lv">{{ selectedGrievance.state }}</span></div>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="msec-lbl">Details</div>
+        <div class="og-chips">
+          <div class="og-chip-sm"><i class="fas fa-flag"></i> {{ selectedGrievance.priority }} priority</div>
+          <div class="og-chip-sm"><i class="fas fa-thumbs-up"></i> {{ selectedGrievance.upvotes }} upvotes</div>
+          <div class="og-chip-sm"><i class="fas fa-phone"></i> {{ selectedGrievance.phoneNumber }}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="og-modal-col">
+
+      <!-- Photo -->
+      <div class="msec" *ngIf="selectedGrievance.imageUrl">
+        <div class="msec-lbl">Photo Evidence</div>
+        <img [src]="selectedGrievance.imageUrl" alt="Evidence" class="og-modal-img" />
+      </div>
+      <div class="og-no-photo" *ngIf="!selectedGrievance.imageUrl">
+        <i class="fas fa-image"></i><span>No photo attached</span>
+      </div>
+
+      <!-- Action box — only for non-solved -->
+      <div class="og-action-box" *ngIf="actionLabel(selectedGrievance)">
+        <div class="og-action-box-title">
+          <i class="fas fa-edit"></i> Update Status
+        </div>
+        <p class="og-action-box-desc">
+          <span *ngIf="selectedGrievance.status === 'pending'">
+            Mark this grievance as <strong>In Process</strong> to notify the citizen that work has begun.
+          </span>
+          <span *ngIf="selectedGrievance.status === 'in process'">
+            Upload a proof photo and send this grievance to the citizen for approval.
+            The citizen will confirm whether the issue is resolved.
+          </span>
+        </p>
+
+        <!-- Solved image upload section — shown when in process → awaiting approval -->
+        <div class="og-solved-upload-section" *ngIf="selectedGrievance.status === 'in process' && confirmingId === selectedGrievance.id">
+          <div class="og-upload-area" *ngIf="!solvedImagePreview">
+            <label class="og-upload-area-label">
+              <i class="fas fa-camera"></i>
+              <span>Upload resolution proof photo <span class="og-upload-required">*required</span></span>
+              <small>This photo will be shown to the citizen to confirm the issue is resolved</small>
+              <input type="file" accept="image/*" style="display:none" (change)="onSolvedImagePick($event)" />
+            </label>
+          </div>
+          <!-- Preview -->
+          <div class="og-upload-preview" *ngIf="solvedImagePreview">
+            <img [src]="solvedImagePreview" alt="Proof photo" class="og-preview-img" />
+            <div class="og-upload-status">
+              <i class="fas"
+                [class.fa-spinner]="solvedUploadStatus === 'uploading'"
+                [class.fa-spin]="solvedUploadStatus === 'uploading'"
+                [class.fa-check-circle]="solvedUploadStatus === 'done'"
+                [class.fa-exclamation-circle]="solvedUploadStatus === 'error'"
+                [style.color]="solvedUploadStatus === 'done' ? '#15803D' : solvedUploadStatus === 'error' ? '#DC2626' : '#718096'">
+              </i>
+              <span>{{ solvedUploadStatus === 'uploading' ? 'Uploading photo...' :
+                       solvedUploadStatus === 'done' ? 'Photo uploaded' : 'Upload failed' }}</span>
+              <button class="og-remove-photo" (click)="removeSolvedImage($event)">
+                <i class="fas fa-times"></i> Remove
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Default — show action button -->
+        <ng-container *ngIf="confirmingId !== selectedGrievance.id && updateSuccess !== selectedGrievance.id">
+          <button class="og-action-box-btn"
+            [class.og-action-box-btn--process]="selectedGrievance.status === 'pending'"
+            [class.og-action-box-btn--solved]="selectedGrievance.status === 'in process'"
+            (click)="requestConfirm(selectedGrievance.id, selectedGrievance, $event)">
+            <i class="fas" [class.fa-arrow-right]="selectedGrievance.status === 'pending'"
+               [class.fa-check]="selectedGrievance.status === 'in process'"></i>
+            {{ actionLabel(selectedGrievance) }}
+          </button>
+        </ng-container>
+
+        <!-- Confirm row -->
+        <ng-container *ngIf="confirmingId === selectedGrievance.id">
+          <div class="og-modal-confirm">
+            <span class="og-confirm-text">Are you sure?</span>
+            <button class="og-confirm-yes"
+              [disabled]="isUpdating || !canConfirmUpdate"
+              [title]="!canConfirmUpdate ? 'Please upload a proof photo first' : ''"
+              (click)="confirmUpdate(selectedGrievance, $event)">
+              <i class="fas fa-spinner fa-spin" *ngIf="isUpdating"></i>
+              <i class="fas fa-check" *ngIf="!isUpdating"></i> Yes, confirm
+            </button>
+            <button class="og-confirm-no" (click)="cancelConfirm($event)">Cancel</button>
+          </div>
+        </ng-container>
+
+        <!-- Success -->
+        <div class="og-success-flash" *ngIf="updateSuccess === selectedGrievance.id">
+          <i class="fas fa-check-circle"></i> Status updated successfully
+        </div>
+      </div>
+
+      <!-- Awaiting approval — read only, show what was sent to citizen -->
+      <div class="og-awaiting-note" *ngIf="selectedGrievance.status === 'awaiting approval'">
+        <i class="fas fa-hourglass-half"></i>
+        Resolution proof has been sent to the citizen. Waiting for their confirmation.
+      </div>
+
+      <!-- Solved — read only note -->
+      <div class="og-solved-note" *ngIf="selectedGrievance.status === 'solved'">
+        <i class="fas fa-check-circle"></i>
+        This grievance has been confirmed as resolved by the citizen.
+      </div>
+
+      <!-- Was previously rejected — show reason -->
+      <div class="og-rejected-note" *ngIf="selectedGrievance.wasRejected && selectedGrievance.status === 'pending'">
+        <div class="og-rejected-note-title">
+          <i class="fas fa-undo"></i> Returned by citizen
+        </div>
+        <p class="og-rejected-reason">{{ selectedGrievance.rejectionReason }}</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>

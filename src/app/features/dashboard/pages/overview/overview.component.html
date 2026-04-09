@@ -1,65 +1,79 @@
-<!-- ─── Loading ───────────────────────────────────────────────── -->
+<!-- Loading -->
 <div class="loading-screen" *ngIf="isLoading">
-  <div class="loading-spinner">
-    <div class="spinner-ring"></div>
-  </div>
+  <div class="loading-spinner"><div class="spinner-ring"></div></div>
   <p class="loading-text">Loading your dashboard...</p>
 </div>
 
-<!-- ─── Error ─────────────────────────────────────────────────── -->
+<!-- Error -->
 <div class="error-banner" *ngIf="errorMessage && !isLoading">
   <i class="fas fa-exclamation-circle"></i>
   <span>{{ errorMessage }}</span>
 </div>
 
-<!-- ─── Main Content ───────────────────────────────────────────── -->
+<!-- Main -->
 <div class="overview-wrap" *ngIf="!isLoading && !errorMessage">
 
   <!-- Page Header -->
   <div class="page-header">
-    <div class="header-text">
+    <div class="header-text" style="position:relative;z-index:1;">
       <h1 class="page-title">{{ greeting }}, {{ userName }}!</h1>
       <p class="page-sub">
         {{ isOfficial
-          ? 'Platform-wide grievance status as of today.'
+          ? 'Showing stats and trends for your department: ' + deptName
           : 'Here is a summary of your grievance activity.' }}
       </p>
     </div>
-    <button
-      *ngIf="!isOfficial"
-      class="btn-submit-new"
-      (click)="navigateTo('/dashboard/submit')"
-    >
-      <i class="fas fa-plus"></i>
-      Submit Grievance
+    <button *ngIf="!isOfficial" class="btn-submit-new" (click)="navigateTo('/dashboard/submit')">
+      <i class="fas fa-plus"></i> Submit Grievance
     </button>
+    <!-- Official quick-action buttons -->
+    <div *ngIf="isOfficial" class="official-header-actions" style="position:relative;z-index:1;">
+      <button class="btn-submit-new" (click)="navigateTo('/dashboard/pending')">
+        <i class="fas fa-clock"></i> Review Pending
+      </button>
+      <button class="btn-submit-new btn-submit-new--teal" (click)="navigateTo('/dashboard/all-grievances')">
+        <i class="fas fa-list"></i> All Grievances
+      </button>
+    </div>
   </div>
 
-  <!-- Stale Alert (Official only) -->
+  <!-- Stale alert — official only -->
   <div class="alert-stale" *ngIf="isOfficial && staleCount > 0">
     <i class="fas fa-exclamation-triangle"></i>
     <span>
       <strong>{{ staleCount }} grievance{{ staleCount > 1 ? 's' : '' }}</strong>
-      pending for more than 7 days — immediate attention needed.
+      in your dept pending for more than 7 days — immediate attention needed.
     </span>
     <button class="alert-action" (click)="navigateTo('/dashboard/pending')">
       Review now <i class="fas fa-arrow-right"></i>
     </button>
   </div>
 
-  <!-- ─── Stat Cards ──────────────────────────────────────────── -->
+  <!-- Official dept scope banner -->
+  <div class="dept-scope-banner" *ngIf="isOfficial">
+    <i class="fas fa-building"></i>
+    <span>
+      All data below is scoped to your department:
+      <strong>{{ deptName }}</strong>
+    </span>
+    <div class="dept-rate">
+      <span class="rate-lbl">Dept resolution rate</span>
+      <div class="rate-track">
+        <div class="rate-fill" [style.width.%]="deptResolutionRate"></div>
+      </div>
+      <span class="rate-pct">{{ deptResolutionRate | number:'1.0-0' }}%</span>
+    </div>
+  </div>
+
+  <!-- Stat Cards -->
   <div class="section-label">
-    {{ isOfficial ? 'Platform overview' : 'My activity' }}
+    {{ isOfficial ? deptName + ' — dept overview' : 'My activity' }}
   </div>
   <div class="stat-grid">
-    <div
-      class="stat-card stat-card--{{ card.colorClass }}"
+    <div class="stat-card stat-card--{{ card.colorClass }}"
       *ngFor="let card of statCards"
-      [style.animation-delay]="card.animDelay"
-    >
-      <div class="stat-icon-wrap">
-        <i class="fas {{ card.icon }}"></i>
-      </div>
+      [style.animation-delay]="card.animDelay">
+      <div class="stat-icon-wrap"><i class="fas {{ card.icon }}"></i></div>
       <div class="stat-body">
         <div class="stat-value">{{ card.value }}</div>
         <div class="stat-label">{{ card.label }}</div>
@@ -67,129 +81,149 @@
     </div>
   </div>
 
-  <!-- ─── Chart ──────────────────────────────────────────────── -->
+  <!-- Resolution Trend Chart — shown for BOTH roles -->
   <div class="section-label">
-    {{ isOfficial ? 'Resolution trend — last 6 months' : 'My submission trend — last 6 months' }}
+    {{ isOfficial
+      ? deptName + ' — resolution trend (last 6 months)'
+      : 'My submission trend — last 6 months' }}
   </div>
-  <div class="chart-card" *ngIf="!isOfficial">
+  <!-- Chart explanation badge -->
+  <div class="chart-info-row">
+    <div class="chart-badge chart-badge--submitted">
+      <span class="badge-dot badge-dot--submitted"></span>
+      {{ isOfficial ? 'Received' : 'Submitted' }}
+    </div>
+    <div class="chart-badge chart-badge--solved">
+      <span class="badge-dot badge-dot--solved"></span>
+      Resolved
+    </div>
+    <p class="chart-explain">
+      {{ isOfficial
+        ? 'Monthly count of grievances received vs resolved in your department.'
+        : 'Monthly count of grievances you submitted vs got resolved.' }}
+    </p>
+  </div>
+  <div class="chart-card">
     <div class="chart-area">
       <div class="bar-group" *ngFor="let bar of monthlyBars">
         <div class="bars">
-          <div
-            class="bar bar-submitted"
-            [style.height]="barHeight(bar.submitted)"
-            [title]="bar.submitted + ' submitted'"
-          ></div>
-          <div
-            class="bar bar-solved"
-            [style.height]="barHeight(bar.solved)"
-            [title]="bar.solved + ' solved'"
-          ></div>
+          <!-- Submitted bar with label -->
+          <div class="bar-col">
+            <span class="bar-label" *ngIf="bar.submitted > 0">{{ bar.submitted }}</span>
+            <div class="bar bar-submitted"
+              [style.height]="barHeight(bar.submitted)"
+              [title]="bar.submitted + (isOfficial ? ' received' : ' submitted')">
+            </div>
+          </div>
+          <!-- Solved bar with label -->
+          <div class="bar-col">
+            <span class="bar-label bar-label--solved" *ngIf="bar.solved > 0">{{ bar.solved }}</span>
+            <div class="bar bar-solved"
+              [style.height]="barHeight(bar.solved)"
+              [title]="bar.solved + ' resolved'">
+            </div>
+          </div>
         </div>
         <div class="bar-month">{{ bar.month }}</div>
       </div>
     </div>
-    <div class="chart-legend">
-      <span class="legend-item">
-        <span class="legend-dot dot-submitted"></span> Submitted
-      </span>
-      <span class="legend-item">
-        <span class="legend-dot dot-solved"></span> Solved
-      </span>
+    <div class="chart-empty" *ngIf="monthlyBars.length === 0 || maxBarHeight === 1">
+      <i class="fas fa-chart-bar"></i>
+      <span>No data yet for the last 6 months</span>
     </div>
   </div>
 
-  <!-- ─── Recent Grievances Table ────────────────────────────── -->
-  <div class="section-label">
-    {{ isOfficial ? 'Most upvoted pending — needs action' : 'My recent grievances' }}
+  <!-- Awaiting approval alert — member only -->
+  <div class="alert-stale" *ngIf="!isOfficial && awaitingApprovalCount > 0"
+    style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); border-color: #F59E0B;">
+    <i class="fas fa-clock" style="color: #D97706;"></i>
+    <span style="color: #78350F;">
+      <strong>{{ awaitingApprovalCount }} grievance{{ awaitingApprovalCount > 1 ? 's' : '' }}</strong>
+      need{{ awaitingApprovalCount === 1 ? 's' : '' }} your review — the official has uploaded a resolution.
+    </span>
+    <button class="alert-action" (click)="navigateTo('/dashboard/pending-approval')"
+      style="background: #D97706;">
+      Review now <i class="fas fa-arrow-right"></i>
+    </button>
   </div>
+
+  <!-- Trending Section — read-only for both roles -->
+  <div class="section-label">
+    {{ isOfficial
+      ? 'Top upvoted in ' + deptName + ' — needs attention'
+      : 'Top trending community issues' }}
+  </div>
+
+  <div class="locality-info-banner">
+    <i class="fas {{ isOfficial ? 'fa-fire' : 'fa-chart-bar' }}"></i>
+    <span *ngIf="!isOfficial">
+      Most upvoted grievances across the platform.
+      To upvote issues, visit the
+      <a style="color:#0A3161;font-weight:700;text-decoration:none;"
+        routerLink="/dashboard/upvote-issues">Upvote Issues</a> page.
+    </span>
+    <span *ngIf="isOfficial">
+      These are the most upvoted grievances in your department — sorted by community urgency.
+    </span>
+  </div>
+
   <div class="table-card">
     <div class="table-header">
       <span class="table-title">
-        {{ isOfficial ? 'Top pending by community votes' : 'Last 5 submissions' }}
+        {{ isOfficial ? 'Most upvoted in ' + deptName : 'Most upvoted grievances' }}
       </span>
-      <button
-        class="table-link"
-        (click)="navigateTo(isOfficial ? '/dashboard/pending' : '/dashboard/my-grievances')"
-      >
+      <button class="table-link"
+        (click)="navigateTo(isOfficial ? '/dashboard/all-grievances' : '/dashboard/all-grievances')">
         View all <i class="fas fa-arrow-right"></i>
       </button>
     </div>
 
-    <div class="table-empty" *ngIf="recentGrievances.length === 0">
-      <i class="fas fa-clipboard"></i>
-      <span>No grievances yet</span>
+    <div class="table-empty" *ngIf="trendingGrievances.length === 0">
+      <i class="fas fa-users"></i>
+      <span>No trending issues found</span>
     </div>
 
-    <div
-      class="grievance-row"
-      *ngFor="let g of recentGrievances; let i = index"
-      [style.animation-delay]="i * 60 + 'ms'"
-      (click)="navigateTo(isOfficial ? '/dashboard/all-grievances' : '/dashboard/my-grievances')"
-    >
+    <div class="grievance-row grievance-row--community"
+      *ngFor="let g of trendingGrievances; let i = index"
+      [style.animation-delay]="i * 60 + 'ms'">
+      <div class="rank-badge">{{ i + 1 }}</div>
       <div class="g-info">
-        <span class="g-desc">{{ g.description | slice:0:60 }}{{ g.description.length > 60 ? '…' : '' }}</span>
+        <span class="g-desc">{{ g.description | slice:0:65 }}{{ g.description.length > 65 ? '…' : '' }}</span>
         <span class="g-meta">
-          {{ g.department }} · {{ g.locality }} · {{ formatDate(g.createdAt) }}
+          {{ g.department }} · {{ g.locality }}, {{ g.city }} · {{ g.userName }} · {{ formatDate(g.createdAt) }}
         </span>
       </div>
-      <span class="status-badge badge-{{ g.status.replace(' ', '-') }}">
-        {{ g.status }}
-      </span>
-      <div class="upvote-pill">
+      <span class="status-badge badge-{{ g.status.replace(' ', '-') }}">{{ g.status }}</span>
+      <div class="upvote-count-pill">
         <i class="fas fa-thumbs-up"></i> {{ g.upvotes }}
       </div>
     </div>
   </div>
 
-  <!-- ─── Locality Community Issues (Member only) ────────────── -->
+  <!-- Member's own recent grievances -->
   <ng-container *ngIf="!isOfficial">
-    <div class="section-label">Trending in your locality — upvote to prioritise</div>
-
-    <div class="locality-info-banner">
-      <i class="fas fa-map-marker-alt"></i>
-      <span>
-        These are the most reported issues near you.
-        <strong>Upvote the ones that affect you</strong> to help officials prioritise faster.
-      </span>
-    </div>
-
+    <div class="section-label">My recent grievances</div>
     <div class="table-card">
       <div class="table-header">
-        <span class="table-title">Most upvoted community issues</span>
-        <button class="table-link" (click)="navigateTo('/dashboard/upvote-issues')">
-          See all community issues <i class="fas fa-arrow-right"></i>
+        <span class="table-title">Last 5 submissions</span>
+        <button class="table-link" (click)="navigateTo('/dashboard/my-grievances')">
+          View all <i class="fas fa-arrow-right"></i>
         </button>
       </div>
-
-      <div class="table-empty" *ngIf="localityGrievances.length === 0">
-        <i class="fas fa-users"></i>
-        <span>No community issues found</span>
+      <div class="table-empty" *ngIf="recentGrievances.length === 0">
+        <i class="fas fa-clipboard"></i>
+        <span>No grievances submitted yet</span>
       </div>
-
-      <div
-        class="grievance-row grievance-row--community"
-        *ngFor="let g of localityGrievances; let i = index"
+      <div class="grievance-row"
+        *ngFor="let g of recentGrievances; let i = index"
         [style.animation-delay]="i * 60 + 'ms'"
-      >
+        (click)="navigateTo('/dashboard/my-grievances')">
         <div class="g-info">
-          <span class="g-desc">{{ g.description | slice:0:60 }}{{ g.description.length > 60 ? '…' : '' }}</span>
-          <span class="g-meta">
-            {{ g.department }} · {{ g.locality }} · by {{ g.userName }} · {{ formatDate(g.createdAt) }}
-          </span>
+          <span class="g-desc">{{ g.description | slice:0:65 }}{{ g.description.length > 65 ? '…' : '' }}</span>
+          <span class="g-meta">{{ g.department }} · {{ g.locality }} · {{ formatDate(g.createdAt) }}</span>
         </div>
-        <span class="status-badge badge-{{ g.status.replace(' ', '-') }}">
-          {{ g.status }}
-        </span>
-        <button
-          class="upvote-btn"
-          [class.upvoted]="g.hasUpvoted"
-          (click)="toggleUpvote(g, $event)"
-          [title]="g.hasUpvoted ? 'Remove upvote' : 'Upvote this issue'"
-        >
-          <i class="fas fa-thumbs-up"></i>
-          {{ g.upvotes }}
-        </button>
+        <span class="status-badge badge-{{ g.status.replace(' ', '-') }}">{{ g.status }}</span>
+        <div class="upvote-readonly"><i class="fas fa-thumbs-up"></i> {{ g.upvotes }}</div>
       </div>
     </div>
   </ng-container>

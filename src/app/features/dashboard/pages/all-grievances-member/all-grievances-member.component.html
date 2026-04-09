@@ -1,0 +1,175 @@
+<p>all-grievances-member works!</p>
+<!-- Loading -->
+<div class="ag-loading" *ngIf="isLoading">
+  <div class="ag-sk-grid">
+    <div class="ag-sk-card" *ngFor="let x of [1,2,3,4,5,6,7,8,9,10,11,12]">
+      <div class="ag-sk-bar"></div>
+      <div class="ag-sk-body">
+        <div class="ag-sk-line ag-sk-short"></div>
+        <div class="ag-sk-line"></div>
+        <div class="ag-sk-line ag-sk-long"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error -->
+<div class="ag-error" *ngIf="errorMessage && !isLoading">
+  <i class="fas fa-exclamation-circle"></i>
+  <span>{{ errorMessage }}</span>
+  <button (click)="load()"><i class="fas fa-redo"></i> Retry</button>
+</div>
+
+<div class="ag-wrap" *ngIf="!isLoading && !errorMessage">
+
+  <!-- Hero -->
+  <div class="ag-hero">
+    <div class="ag-hero-text">
+      <h1 class="ag-title">
+        <i class="fas fa-globe-asia"></i> All Grievances
+      </h1>
+      <p class="ag-sub">
+        Browse all civic grievances on the platform.
+        <strong class="ag-count">{{ totalRecords }}</strong> total grievances found.
+      </p>
+      <div class="ag-readonly-notice">
+        <i class="fas fa-eye"></i>
+        Read-only view — to upvote issues visit the
+        <a routerLink="/dashboard/upvote-issues">Upvote Issues</a> page
+      </div>
+    </div>
+    <div class="ag-hero-chip">
+      <span class="ag-chip-num">{{ totalRecords }}</span>
+      <span class="ag-chip-lbl">Total</span>
+    </div>
+  </div>
+
+  <!-- Filter Panel -->
+  <div class="ag-filters">
+    <div class="ag-filter-row">
+      <!-- Search by name -->
+      <div class="ag-input-wrap">
+        <i class="fas fa-user"></i>
+        <input type="text" placeholder="Search by submitter name..."
+          [(ngModel)]="searchName" (ngModelChange)="onFilter()" class="ag-input" />
+      </div>
+      <!-- City -->
+      <div class="ag-input-wrap">
+        <i class="fas fa-city"></i>
+        <input type="text" placeholder="Filter by city..."
+          [(ngModel)]="filterCity" (ngModelChange)="onFilter()" class="ag-input" />
+      </div>
+      <!-- Pincode -->
+      <div class="ag-input-wrap">
+        <i class="fas fa-map-pin"></i>
+        <input type="text" placeholder="Filter by pincode..."
+          maxlength="6" [(ngModel)]="filterPincode" (ngModelChange)="onFilter()" class="ag-input" />
+      </div>
+    </div>
+    <div class="ag-filter-row">
+      <!-- Department -->
+      <select class="ag-select" [(ngModel)]="filterDept" (ngModelChange)="onFilter()">
+        <option value="">All Departments</option>
+        <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+      </select>
+      <!-- Status -->
+      <select class="ag-select" [(ngModel)]="filterStatus" (ngModelChange)="onFilter()">
+        <option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</option>
+      </select>
+      <!-- Sort -->
+      <div class="ag-sort-pills">
+        <button class="ag-sort-btn"
+          *ngFor="let s of sortOptions"
+          [class.ag-sort-btn--active]="sortBy === s.key"
+          (click)="onSort(s.key)">
+          <i class="fas {{ s.icon }}"></i> {{ s.label }}
+        </button>
+      </div>
+      <!-- Reset -->
+      <button class="ag-reset-btn" (click)="resetFilters()">
+        <i class="fas fa-times"></i> Reset
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty -->
+  <div class="ag-empty" *ngIf="grievances.length === 0">
+    <div class="ag-empty-icon"><i class="fas fa-search"></i></div>
+    <h3>No grievances found</h3>
+    <p>Try adjusting your filters</p>
+  </div>
+
+  <!-- Table -->
+  <div class="ag-table-wrap" *ngIf="grievances.length > 0">
+    <table class="ag-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Description</th>
+          <th>Department</th>
+          <th>Location</th>
+          <th>Submitted By</th>
+          <th>Status</th>
+          <th>Upvotes</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let g of grievances; trackBy: trackById; let i = index"
+          class="ag-row"
+          [style.animation-delay]="i * 30 + 'ms'">
+          <td class="ag-num">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+          <td class="ag-desc">
+            <span class="ag-desc-text">
+              {{ g.description.length > 60 ? (g.description | slice:0:60) + '…' : g.description }}
+            </span>
+          </td>
+          <td>
+            <span class="ag-dept-badge">
+              <i class="fas {{ deptIcon(g.department) }}"></i>
+              {{ g.department }}
+            </span>
+          </td>
+          <td class="ag-loc">
+            <div>{{ g.locality }}, {{ g.city }}</div>
+            <div class="ag-pincode">{{ g.pincode }}</div>
+          </td>
+          <td class="ag-user">{{ g.userName }}</td>
+          <td>
+            <span class="ag-status-pill"
+              [class.ag-pill--pending]="g.status === 'pending'"
+              [class.ag-pill--process]="g.status === 'in process'"
+              [class.ag-pill--awaiting]="g.status === 'awaiting approval'"
+              [class.ag-pill--solved]="g.status === 'solved'">
+              {{ g.status }}
+            </span>
+          </td>
+          <td class="ag-upvotes">
+            <i class="fas fa-thumbs-up"></i> {{ g.upvotes }}
+          </td>
+          <td class="ag-date">{{ formatDate(g.createdAt) }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="ag-pagination" *ngIf="totalPages > 1">
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(1)">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="pg-btn" *ngFor="let p of pageNumbers"
+      [class.pg-active]="p === currentPage" (click)="changePage(p)">{{ p }}</button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+    <span class="pg-info">Page {{ currentPage }} of {{ totalPages }} · {{ totalRecords }} total</span>
+  </div>
+
+</div>

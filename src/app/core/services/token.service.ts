@@ -1,5 +1,6 @@
 
 import { Injectable } from '@angular/core';
+import { User } from '../models/user.model';
 
 @Injectable({
   providedIn: 'root'
@@ -49,20 +50,20 @@ export class TokenService {
   /**
    * Save refresh token
    */
-  saveRefreshToken(refreshToken: string, rememberMe: boolean = false): void {
-    if (rememberMe) {
-      localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
-    } else {
-      sessionStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
-    }
-  }
+  // saveRefreshToken(refreshToken: string, rememberMe: boolean = false): void {
+  //   if (rememberMe) {
+  //     localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+  //   } else {
+  //     sessionStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+  //   }
+  // }
 
-  /**
-   * Get refresh token
-   */
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY) || sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
-  }
+  // /**
+  //  * Get refresh token
+  //  */
+  // getRefreshToken(): string | null {
+  //   return localStorage.getItem(this.REFRESH_TOKEN_KEY) || sessionStorage.getItem(this.REFRESH_TOKEN_KEY);
+  // }
 
   /**
    * Save user data to storage
@@ -84,25 +85,30 @@ export class TokenService {
   /**
  * Get user data from storage
  */
-getUser(): any | null {
-  const userStr = localStorage.getItem(this.USER_KEY)
+getUser(): User | null {
+    const raw = localStorage.getItem(this.USER_KEY)
              ?? sessionStorage.getItem(this.USER_KEY);
-  
-  // Check if userStr exists and is not 'undefined' string
-  if (userStr && userStr !== 'undefined' && userStr !== 'null') {
+    if (!raw) return null;
     try {
-      return JSON.parse(userStr);
-    } catch (error) {
-      console.error('Error parsing user data, clearing corrupted data:', error);
-      // Clear corrupted data
-      localStorage.removeItem(this.USER_KEY);
-      sessionStorage.removeItem(this.USER_KEY);
+      const parsed = JSON.parse(raw);
+      // Always re-normalise signInType on read — guards against stale
+      // storage data where signInType was saved as an integer (0 or 1)
+      // before the normalisation fix was in place, or any other case
+      // where the string form isn't present.
+      return this.normaliseSignInType(parsed);
+    } catch {
+      this.removeToken();
       return null;
     }
   }
-  return null;
-}
-
+  private normaliseSignInType(user: any): User {
+    if (user.signInType === 1 || user.signInType === 'GovernmentOfficial') {
+      user.signInType = 'GovernmentOfficial';
+    } else {
+      user.signInType = 'LocalityMember';
+    }
+    return user as User;
+  }
   /**
    * Decode JWT token payload
    */

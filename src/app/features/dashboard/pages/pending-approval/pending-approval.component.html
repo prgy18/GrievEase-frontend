@@ -1,0 +1,227 @@
+<!-- Loading -->
+<div class="pa-loading" *ngIf="isLoading">
+  <div class="pa-sk-grid">
+    <div class="pa-sk-card" *ngFor="let x of [1,2,3]">
+      <div class="pa-sk-bar"></div>
+      <div class="pa-sk-body">
+        <div class="pa-sk-line pa-sk-short"></div>
+        <div class="pa-sk-line"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Error -->
+<div class="pa-error" *ngIf="errorMessage && !isLoading">
+  <i class="fas fa-exclamation-circle"></i>
+  <span>{{ errorMessage }}</span>
+  <button (click)="load()"><i class="fas fa-redo"></i> Retry</button>
+</div>
+
+<div class="pa-wrap" *ngIf="!isLoading && !errorMessage">
+
+  <!-- Hero -->
+  <div class="pa-hero">
+    <div class="pa-hero-text">
+      <div class="pa-eyebrow">
+        <i class="fas fa-bell"></i> Action Required
+      </div>
+      <h1 class="pa-title">Pending Your Approval</h1>
+      <p class="pa-sub">
+        The government official has uploaded proof of resolution for the following
+        grievances. Review them and confirm whether the issue has been fixed.
+      </p>
+    </div>
+    <div class="pa-count-chip">
+      <span class="pa-count-num">{{ grievances.length }}</span>
+      <span class="pa-count-lbl">Awaiting Review</span>
+    </div>
+  </div>
+
+  <!-- Empty — all approved/rejected -->
+  <div class="pa-empty" *ngIf="grievances.length === 0">
+    <div class="pa-empty-icon"><i class="fas fa-check-double"></i></div>
+    <h3>All caught up!</h3>
+    <p>No grievances are currently waiting for your review.</p>
+  </div>
+
+  <!-- Cards -->
+  <div class="pa-grid" *ngIf="grievances.length > 0">
+    <div class="pa-card"
+      *ngFor="let g of grievances; trackBy: trackById; let i = index"
+      [style.animation-delay]="i * 60 + 'ms'"
+      (click)="openModal(g)">
+
+      <!-- Accent bar — amber for awaiting approval -->
+      <div class="pa-card-bar"></div>
+
+      <div class="pa-card-head">
+        <span class="pa-dept-badge">
+          <i class="fas {{ deptIcon(g.department) }}"></i>
+          {{ g.department }}
+        </span>
+        <span class="pa-awaiting-pill">
+          <i class="fas fa-clock"></i> Awaiting Your Review
+        </span>
+      </div>
+
+      <p class="pa-card-desc">
+        {{ g.description.length > 90 ? (g.description | slice:0:90) + '…' : g.description }}
+      </p>
+
+      <div class="pa-card-meta">
+        <span><i class="fas fa-map-marker-alt"></i> {{ g.locality }}, {{ g.city }}</span>
+        <span><i class="fas fa-calendar-alt"></i> Filed {{ formatDate(g.createdAt) }}</span>
+      </div>
+
+      <div class="pa-card-footer">
+        <div class="pa-proof-notice">
+          <i class="fas fa-image"></i>
+          Official has uploaded resolution proof — click to review
+        </div>
+        <i class="fas fa-chevron-right pa-chevron"></i>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ MODAL ═══════════════════════════════════════════════════ -->
+<div class="pa-overlay" [class.pa-overlay--open]="modalOpen" (click)="closeModal()"></div>
+
+<div class="pa-modal" [class.pa-modal--open]="modalOpen"
+  *ngIf="selected" (click)="$event.stopPropagation()">
+
+  <!-- Modal Header -->
+  <div class="pa-modal-head">
+    <div class="pa-modal-head-left">
+      <div class="pa-modal-icon">
+        <i class="fas {{ deptIcon(selected.department) }}"></i>
+      </div>
+      <div>
+        <div class="pa-modal-dept">{{ selected.department }}</div>
+        <div class="pa-modal-meta">
+          <span><i class="fas fa-calendar-alt"></i> Filed {{ formatDate(selected.createdAt) }}</span>
+          <span><i class="fas fa-map-marker-alt"></i> {{ selected.locality }}, {{ selected.city }}</span>
+        </div>
+      </div>
+    </div>
+    <button class="pa-modal-close" (click)="closeModal()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Success flash -->
+  <div class="pa-success-banner" *ngIf="actionSuccess === 'approved'">
+    <i class="fas fa-check-circle"></i>
+    Grievance marked as <strong>Solved</strong>. Thank you for confirming!
+  </div>
+  <div class="pa-reject-banner" *ngIf="actionSuccess === 'rejected'">
+    <i class="fas fa-undo"></i>
+    Grievance sent back to <strong>Pending</strong>. The official will be notified.
+  </div>
+
+  <!-- Modal Body -->
+  <div class="pa-modal-body" *ngIf="!actionSuccess">
+    <div class="pa-modal-col">
+
+      <div class="pa-msec">
+        <div class="pa-msec-lbl">Your Complaint</div>
+        <p class="pa-msec-desc">{{ selected.description }}</p>
+      </div>
+
+      <div class="pa-msec">
+        <div class="pa-msec-lbl">Location</div>
+        <div class="pa-loc-grid">
+          <div class="pa-loc-cell"><span class="lk">Street</span><span class="lv">{{ selected.street }}</span></div>
+          <div class="pa-loc-cell"><span class="lk">Locality</span><span class="lv">{{ selected.locality }}</span></div>
+          <div class="pa-loc-cell"><span class="lk">City</span><span class="lv">{{ selected.city }}</span></div>
+          <div class="pa-loc-cell"><span class="lk">Pincode</span><span class="lv">{{ selected.pincode }}</span></div>
+        </div>
+      </div>
+
+      <!-- Original issue photo -->
+      <div class="pa-msec" *ngIf="selected.imageUrl">
+        <div class="pa-msec-lbl">Original Issue Photo</div>
+        <img [src]="selected.imageUrl" alt="Issue photo" class="pa-img" />
+      </div>
+
+    </div>
+
+    <div class="pa-modal-col">
+
+      <!-- Resolution proof photo — key content -->
+      <div class="pa-proof-box">
+        <div class="pa-proof-header">
+          <i class="fas fa-check-circle"></i>
+          Official's Resolution Proof
+        </div>
+        <div class="pa-proof-img-wrap" *ngIf="selected.solvedImageUrl">
+          <img [src]="selected.solvedImageUrl" alt="Resolution proof" class="pa-proof-img" />
+        </div>
+        <div class="pa-no-proof" *ngIf="!selected.solvedImageUrl">
+          <i class="fas fa-image"></i>
+          <span>No proof photo uploaded</span>
+        </div>
+      </div>
+
+      <!-- Action box -->
+      <div class="pa-action-box" *ngIf="!showRejectForm">
+        <div class="pa-action-box-title">Your Verdict</div>
+        <p class="pa-action-box-desc">
+          Has this issue been fully resolved to your satisfaction?
+        </p>
+        <div class="pa-action-error" *ngIf="actionError">
+          <i class="fas fa-exclamation-circle"></i> {{ actionError }}
+        </div>
+        <div class="pa-action-btns">
+          <button class="pa-approve-btn" [disabled]="isActioning" (click)="approve()">
+            <i class="fas fa-spinner fa-spin" *ngIf="isActioning"></i>
+            <i class="fas fa-check" *ngIf="!isActioning"></i>
+            Yes, Mark as Solved
+          </button>
+          <button class="pa-reject-btn" [disabled]="isActioning" (click)="openRejectForm()">
+            <i class="fas fa-times"></i>
+            No, Not Resolved
+          </button>
+        </div>
+      </div>
+
+      <!-- Rejection form -->
+      <div class="pa-reject-form" *ngIf="showRejectForm">
+        <div class="pa-reject-form-title">
+          <i class="fas fa-comment-alt"></i> Why is it not resolved?
+        </div>
+        <p class="pa-reject-form-sub">
+          Your reason will be shared with the official so they know what still needs to be fixed.
+        </p>
+        <textarea
+          class="pa-reject-textarea"
+          [(ngModel)]="rejectionReason"
+          placeholder="e.g. The road is still broken near the junction. Only partial repair was done."
+          rows="4"
+          maxlength="500">
+        </textarea>
+        <div class="pa-reject-chars">{{ rejectionReason.length }} / 500</div>
+        <div class="pa-action-error" *ngIf="actionError">
+          <i class="fas fa-exclamation-circle"></i> {{ actionError }}
+        </div>
+        <div class="pa-reject-form-btns">
+          <button class="pa-submit-reject-btn"
+            [disabled]="isActioning || rejectionReason.trim().length === 0"
+            (click)="submitRejection()">
+            <i class="fas fa-spinner fa-spin" *ngIf="isActioning"></i>
+            <i class="fas fa-paper-plane" *ngIf="!isActioning"></i>
+            Submit Rejection
+          </button>
+          <button class="pa-cancel-reject-btn" (click)="cancelReject()">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

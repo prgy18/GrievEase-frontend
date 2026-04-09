@@ -822,3 +822,14 @@
   .field-grid { grid-template-columns: 1fr; }
   .dept-grid  { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* City mismatch pincode error */
+.pincode-city-error {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  margin-top: 0.5rem; padding: 0.625rem 0.875rem;
+  background: #FEF2F2; border: 1.5px solid #FCA5A5;
+  border-radius: 8px; font-family: 'Open Sans', sans-serif;
+  font-size: 0.8rem; font-weight: 600; color: #DC2626;
+  line-height: 1.5;
+}
+.pincode-city-error i { font-size: 0.875rem; flex-shrink: 0; margin-top: 1px; }

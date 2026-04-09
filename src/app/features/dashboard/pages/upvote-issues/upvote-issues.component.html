@@ -1,1 +1,327 @@
-<p>upvote-issues works!</p>
+<!-- ─── Loading ───────────────────────────────────────────────── -->
+<div class="uv-loading" *ngIf="isLoading">
+  <div class="uv-pulse-grid">
+    <div class="pulse-card" *ngFor="let x of [1,2,3,4,5,6]">
+      <div class="pulse-vote"></div>
+      <div class="pulse-body">
+        <div class="pulse-line pulse-line--short"></div>
+        <div class="pulse-line"></div>
+        <div class="pulse-line pulse-line--long"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Error ─────────────────────────────────────────────────── -->
+<div class="uv-error" *ngIf="errorMessage && !isLoading">
+  <i class="fas fa-exclamation-circle"></i>
+  <span>{{ errorMessage }}</span>
+  <button (click)="load()"><i class="fas fa-redo"></i> Retry</button>
+</div>
+
+<!-- ─── Main ───────────────────────────────────────────────────── -->
+<div class="uv-wrap" *ngIf="!isLoading && !errorMessage">
+
+  <!-- ─── Hero Header ─────────────────────────────────────────── -->
+  <div class="uv-hero">
+    <div class="uv-hero-text">
+      <h1 class="uv-title">
+        <i class="fas fa-hands-helping uv-title-icon"></i>
+        Community Issues
+      </h1>
+      <p class="uv-sub">
+        Your upvote tells officials this problem affects you too.
+        <strong class="uv-count">{{ totalRecords }}</strong> active issues need attention.
+      </p>
+    </div>
+    <!-- Live count chips -->
+    <div class="uv-hero-chips">
+      <div class="hero-chip">
+        <i class="fas fa-fire"></i>
+        <span>{{ totalRecords }}</span>
+        <small>Active</small>
+      </div>
+      <div class="hero-chip hero-chip--gold">
+        <i class="fas fa-map-marker-alt"></i>
+        <span>Your City</span>
+        <small>Browse all</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Controls ──────────────────────────────────────────────── -->
+  <div class="uv-toolbar">
+    <!-- Search -->
+    <div class="uv-search-wrap">
+      <i class="fas fa-search"></i>
+      <input class="uv-search" type="text"
+        placeholder="Search issues..."
+        [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+      <button *ngIf="searchQuery" (click)="searchQuery=''; onSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Department -->
+    <select class="uv-select" [(ngModel)]="selectedDept" (ngModelChange)="onDeptChange()">
+      <option value="">All Departments</option>
+      <option *ngFor="let d of departments" [value]="d.value">{{ d.label }}</option>
+    </select>
+
+    <!-- Sort -->
+    <div class="uv-sort">
+      <button class="sort-btn"
+        *ngFor="let s of sortOptions"
+        [class.sort-btn--active]="sortBy === s.key"
+        (click)="onSort(s.key)">
+        <i class="fas {{ s.icon }}"></i>{{ s.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ─── Empty ───────────────────────────────────────────────── -->
+  <div class="uv-empty" *ngIf="filtered.length === 0">
+    <div class="empty-icon"><i class="fas fa-city"></i></div>
+    <h3>No issues found</h3>
+    <p>{{ searchQuery ? 'Try different keywords' : 'No active issues for these filters' }}</p>
+  </div>
+
+  <!-- ─── Grid ────────────────────────────────────────────────── -->
+  <div class="uv-grid" *ngIf="filtered.length > 0">
+
+    <div class="uv-card"
+      *ngFor="let g of filtered; trackBy: trackById; let i = index"
+      [class.uv-card--voted]="g.hasUpvoted"
+      [class.uv-card--own]="isOwnGrievance(g)"
+      [style.animation-delay]="i * 45 + 'ms'"
+      (click)="openModal(g)">
+
+      <!-- Colour accent top bar driven by dept -->
+      <div class="card-bar" [style.background]="deptColor(g.department)"></div>
+
+      <!-- ── Vote panel ────────────────────────────────────── -->
+      <div class="vote-panel" [class.vote-panel--voted]="g.hasUpvoted">
+        <button class="vote-btn"
+          [class.vote-btn--active]="g.hasUpvoted"
+          [class.vote-btn--own]="isOwnGrievance(g)"
+          [class.vote-btn--loading]="upvotingId === g.id"
+          (click)="toggleUpvote(g, $event)"
+          [title]="isOwnGrievance(g) ? 'You cannot upvote your own issue'
+                  : g.hasUpvoted ? 'Remove upvote' : 'Upvote'">
+
+          <!-- Own issue lock -->
+          <ng-container *ngIf="isOwnGrievance(g)">
+            <i class="fas fa-lock vote-icon"></i>
+            <span class="vote-num">{{ g.upvotes }}</span>
+            <span class="vote-tag">Mine</span>
+          </ng-container>
+
+          <!-- Loading -->
+          <ng-container *ngIf="!isOwnGrievance(g) && upvotingId === g.id">
+            <i class="fas fa-spinner fa-spin vote-icon"></i>
+            <span class="vote-num">{{ g.upvotes }}</span>
+          </ng-container>
+
+          <!-- Normal -->
+          <ng-container *ngIf="!isOwnGrievance(g) && upvotingId !== g.id">
+            <i class="fas vote-icon"
+              [class.fa-chevron-up]="!g.hasUpvoted"
+              [class.fa-check]="g.hasUpvoted"></i>
+            <span class="vote-num">{{ g.upvotes }}</span>
+            <span class="vote-tag">{{ g.hasUpvoted ? 'Voted' : 'Vote' }}</span>
+          </ng-container>
+        </button>
+      </div>
+
+      <!-- ── Card body ─────────────────────────────────────── -->
+      <div class="card-body">
+
+        <!-- Dept + status row -->
+        <div class="card-tags">
+          <span class="dept-tag" [style.background]="deptColor(g.department) + '22'"
+            [style.color]="deptColor(g.department)" [style.border-color]="deptColor(g.department) + '44'">
+            <i class="fas {{ deptIcon(g.department) }}"></i>
+            {{ g.department }}
+          </span>
+          <span class="status-tag"
+            [class.tag-pending]="g.status === 'pending'"
+            [class.tag-process]="g.status === 'in process'">
+            {{ g.status }}
+          </span>
+          <!-- Own badge -->
+          <span class="own-tag" *ngIf="isOwnGrievance(g)">
+            <i class="fas fa-user"></i> Your issue
+          </span>
+        </div>
+
+        <!-- Description -->
+        <p class="card-desc">
+          {{ g.description.length > 95
+              ? (g.description | slice:0:95) + '…'
+              : g.description }}
+        </p>
+
+        <!-- Footer -->
+        <div class="card-foot">
+          <div class="card-loc">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ g.locality }}, {{ g.city }}
+          </div>
+          <div class="card-meta">
+            <span><i class="fas fa-user-circle"></i>{{ g.userName }}</span>
+            <span class="card-dot">·</span>
+            <span>{{ daysAgo(g.createdAt) }}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Voted checkmark corner ribbon -->
+      <div class="voted-corner" *ngIf="g.hasUpvoted">
+        <i class="fas fa-check"></i>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── Pagination ──────────────────────────────────────────── -->
+  <div class="uv-pagination" *ngIf="totalPages > 1">
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(1)">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="pg-btn" *ngFor="let p of pageNumbers"
+      [class.pg-active]="p === currentPage" (click)="changePage(p)">{{ p }}</button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+    <span class="pg-info">Page {{ currentPage }} of {{ totalPages }}</span>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     DETAIL MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" [class.modal-overlay--open]="modalOpen" (click)="closeModal()"></div>
+
+<div class="modal-box" [class.modal-box--open]="modalOpen"
+  *ngIf="selectedGrievance" (click)="$event.stopPropagation()">
+
+  <!-- Header — always navy gradient, dept colour only on icon -->
+  <div class="modal-head">
+    <div class="modal-head-left">
+      <div class="modal-dept-icon"
+        [style.background]="deptColor(selectedGrievance.department) + '30'"
+        [style.border-color]="deptColor(selectedGrievance.department) + '60'">
+        <i class="fas {{ deptIcon(selectedGrievance.department) }}"
+          [style.color]="deptColor(selectedGrievance.department)"></i>
+      </div>
+      <div>
+        <div class="modal-dept-name">{{ selectedGrievance.department }}</div>
+        <div class="modal-head-meta">
+          <span><i class="fas fa-user"></i> {{ selectedGrievance.userName }}</span>
+          <span><i class="fas fa-calendar-alt"></i> {{ formatDate(selectedGrievance.createdAt) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-head-right">
+      <!-- Big vote button -->
+      <button class="modal-vote-btn"
+        [class.modal-vote-btn--active]="selectedGrievance.hasUpvoted"
+        [class.modal-vote-btn--own]="isOwnGrievance(selectedGrievance)"
+        [disabled]="isOwnGrievance(selectedGrievance) || upvotingId === selectedGrievance.id"
+        (click)="toggleUpvote(selectedGrievance, $event)"
+        [title]="isOwnGrievance(selectedGrievance) ? 'Cannot upvote your own issue' : ''">
+        <i class="fas"
+          [class.fa-lock]="isOwnGrievance(selectedGrievance)"
+          [class.fa-thumbs-up]="!isOwnGrievance(selectedGrievance) && !selectedGrievance.hasUpvoted && upvotingId !== selectedGrievance.id"
+          [class.fa-thumbs-down]="!isOwnGrievance(selectedGrievance) && selectedGrievance.hasUpvoted && upvotingId !== selectedGrievance.id"
+          [class.fa-spinner]="upvotingId === selectedGrievance.id"
+          [class.fa-spin]="upvotingId === selectedGrievance.id"></i>
+        <span>{{ selectedGrievance.upvotes }}</span>
+        <small>{{ isOwnGrievance(selectedGrievance) ? 'Your issue' : selectedGrievance.hasUpvoted ? 'Voted' : 'Upvote' }}</small>
+      </button>
+      <button class="modal-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Own-issue notice -->
+  <div class="own-notice" *ngIf="isOwnGrievance(selectedGrievance)">
+    <i class="fas fa-info-circle"></i>
+    This is your own grievance — you cannot upvote it. Others can upvote to show support.
+  </div>
+
+  <!-- Body -->
+  <div class="modal-body">
+    <div class="modal-col">
+
+      <div class="msec">
+        <div class="msec-label">Description</div>
+        <p class="msec-desc">{{ selectedGrievance.description }}</p>
+      </div>
+
+      <div class="msec">
+        <div class="msec-label">Location</div>
+        <div class="loc-grid">
+          <div class="loc-cell"><span class="lk">Street</span><span class="lv">{{ selectedGrievance.street }}</span></div>
+          <div class="loc-cell"><span class="lk">Locality</span><span class="lv">{{ selectedGrievance.locality }}</span></div>
+          <div class="loc-cell"><span class="lk">City</span><span class="lv">{{ selectedGrievance.city }}</span></div>
+          <div class="loc-cell"><span class="lk">State</span><span class="lv">{{ selectedGrievance.state }}</span></div>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="msec-label">Details</div>
+        <div class="meta-chips">
+          <div class="mc"><i class="fas fa-flag"></i>{{ selectedGrievance.priority }} priority</div>
+          <div class="mc"><i class="fas fa-thumbs-up"></i>{{ selectedGrievance.upvotes }} upvotes</div>
+          <div class="mc"><i class="fas fa-phone"></i>{{ selectedGrievance.phoneNumber }}</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-col">
+      <div class="msec" *ngIf="selectedGrievance.imageUrl">
+        <div class="msec-label">Photo Evidence</div>
+        <img [src]="selectedGrievance.imageUrl" alt="Evidence" class="modal-img" />
+      </div>
+
+      <!-- Impact box -->
+      <div class="impact-box">
+        <div class="impact-header">
+          <i class="fas fa-users"></i>
+          <span>Community Signal</span>
+        </div>
+        <div class="impact-number">
+          <span class="impact-big">{{ selectedGrievance.upvotes }}</span>
+          <span class="impact-text">people have upvoted this issue</span>
+        </div>
+        <button class="impact-btn"
+          *ngIf="!isOwnGrievance(selectedGrievance)"
+          [class.impact-btn--voted]="selectedGrievance.hasUpvoted"
+          [disabled]="upvotingId === selectedGrievance.id"
+          (click)="toggleUpvote(selectedGrievance, $event)">
+          <i class="fas"
+            [class.fa-hand-point-up]="!selectedGrievance.hasUpvoted"
+            [class.fa-times]="selectedGrievance.hasUpvoted"
+            [class.fa-spinner]="upvotingId === selectedGrievance.id"
+            [class.fa-spin]="upvotingId === selectedGrievance.id"></i>
+          {{ selectedGrievance.hasUpvoted ? 'Remove my vote' : 'I am also affected' }}
+        </button>
+        <div class="own-impact-note" *ngIf="isOwnGrievance(selectedGrievance)">
+          <i class="fas fa-lock"></i> You submitted this issue
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

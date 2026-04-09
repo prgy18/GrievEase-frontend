@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, NavigationExtras } from '@angular/router';
+import { Grievance } from '../../../../core/models/grievance.model';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -59,6 +60,15 @@ export class SubmitGrievanceComponent implements OnInit {
   // Pincode state
   pincodeStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
   pincodeMessage = '';
+  pincodeError   = '';  // shown when pincode resolves to different city
+
+  // User's registered city/state — locked fields
+  userCity  = '';
+  userState = '';
+
+  // ── Edit mode — set when navigated from My Grievances ────────
+  editGrievance: Grievance | null = null;
+  get isEditMode(): boolean { return !!this.editGrievance; }
 
   // Image upload state
   imageFile: File | null = null;
@@ -83,34 +93,71 @@ export class SubmitGrievanceComponent implements OnInit {
   ngOnInit(): void {
     const user = this.authService.currentUserValue;
 
+    // Store user's city for pincode validation
+    this.userCity  = user?.city  ?? '';
+    this.userState = user?.state ?? '';
+
+    // ── Check if navigated here for editing ───────────────────
+    const nav = this.router.getCurrentNavigation();
+    this.editGrievance = nav?.extras?.state?.['editGrievance']
+      ?? (history.state?.editGrievance ?? null);
+
     this.form = this.fb.group({
-      // Reporter Info — name pre-filled from user profile
       name:        [user?.name ?? '',        [Validators.required, Validators.maxLength(100)]],
       phoneNumber: [user?.phoneNumber ?? '', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-
-      // Location
-      pincode:  ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
-      street:   ['', [Validators.required, Validators.maxLength(255)]],
-      locality: ['', [Validators.required, Validators.maxLength(100)]],
-      city:     ['', [Validators.required, Validators.maxLength(100)]],
-      state:    ['', [Validators.required, Validators.maxLength(100)]],
-
-      // Issue
+      pincode:     ['', [Validators.required, Validators.pattern(/^[0-9]{6}$/)]],
+      street:      ['', [Validators.required, Validators.maxLength(255)]],
+      locality:    ['', [Validators.required, Validators.maxLength(100)]],
+      // city/state locked to user's registered values — always disabled
+      city:        [{ value: this.userCity,  disabled: true }, Validators.required],
+      state:       [{ value: this.userState, disabled: true }, Validators.required],
       department:  ['', Validators.required],
       description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(2000)]]
     });
 
-    // Watch pincode field — auto-fill city/state when 6 digits entered
+    // Pre-populate city/state status message
+    if (this.userCity) {
+      this.pincodeStatus  = 'idle';
+      this.pincodeMessage = '';
+    }
+
+    // ── Pre-fill form if editing ──────────────────────────────
+    if (this.editGrievance) {
+      const g = this.editGrievance;
+      this.form.patchValue({
+        name:        g.name,
+        phoneNumber: g.phoneNumber,
+        street:      g.street,
+        locality:    g.locality,
+        department:  g.department,
+        description: g.description,
+        pincode:     g.pincode ?? '',
+      });
+      // Show resolved pincode status
+      if (g.pincode) {
+        this.pincodeStatus  = 'success';
+        this.pincodeMessage = `${g.city}, ${g.state}`;
+      }
+      // Pincode optional in edit mode
+      this.form.get('pincode')!.clearValidators();
+      this.form.get('pincode')!.updateValueAndValidity();
+      // Pre-fill existing image
+      if (g.imageUrl) {
+        this.imageUrl        = g.imageUrl;
+        this.imagePublicId   = g.imagePublicId;
+        this.imagePreviewUrl = g.imageUrl;
+        this.imageUploadStatus = 'done';
+      }
+    }
+
+    // Watch pincode — validate against user's city
     this.form.get('pincode')!.valueChanges.subscribe((val: string) => {
       if (val && val.length === 6 && /^[0-9]{6}$/.test(val)) {
         this.fetchPincodeData(val);
-      } else {
-        // Clear if user deletes digits
-        if (val.length < 6) {
-          this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
-          this.pincodeStatus = 'idle';
-          this.pincodeMessage = '';
-        }
+      } else if (val.length < 6) {
+        this.pincodeStatus  = 'idle';
+        this.pincodeMessage = '';
+        this.pincodeError   = '';
       }
     });
   }
@@ -125,42 +172,49 @@ export class SubmitGrievanceComponent implements OnInit {
   get canSubmit(): boolean {
     return this.form.valid
       && this.imageUploadStatus === 'done'
-      && !this.isSubmitting;
+      && !this.isSubmitting
+      && !this.pincodeError;   // block if pincode belongs to wrong city
   }
 
   // ── Pincode API ───────────────────────────────────────────────
   private fetchPincodeData(pin: string): void {
-    this.pincodeStatus = 'loading';
+    this.pincodeStatus  = 'loading';
     this.pincodeMessage = 'Looking up pincode...';
+    this.pincodeError   = '';
 
-    // Clear old values while loading
-    this.form.patchValue({ city: '', state: '' }, { emitEvent: false });
-
-    // ── Route through our own backend to avoid CORS / firewall issues
-    // with the third-party postalpincode.in API. The backend proxies
-    // the request server-side and returns the same JSON response.
     this.http
-      .get<PostalApiResponse[]>(`${environment.apiUrl}/Grievance/pincode/${pin}`)
+      .get<PostalApiResponse[]>(`${environment.apiUrl}/location/pincode/${pin}`)
       .subscribe({
         next: (res) => {
           const result = res[0];
           if (result.Status === 'Success' && result.PostOffice?.length) {
-            const po = result.PostOffice[0];
-            const city  = po.District || po.Block || po.Name;
-            const state = po.State;
+            const po            = result.PostOffice[0];
+            const resolvedCity  = po.District || po.Block || po.Name;
+            const resolvedState = po.State;
 
-            this.form.patchValue({ city, state }, { emitEvent: false });
-            this.pincodeStatus  = 'success';
-            this.pincodeMessage = `${city}, ${state}`;
+            // Validate pincode against user's registered city
+            if (this.userCity &&
+                resolvedCity.toLowerCase() !== this.userCity.toLowerCase()) {
+              // Different city — block submission
+              this.pincodeStatus  = 'error';
+              this.pincodeMessage = '';
+              this.pincodeError   =
+                `This pincode belongs to ${resolvedCity}. ` +
+                `You can only submit grievances for ${this.userCity}.`;
+            } else {
+              // Same city — valid
+              this.pincodeStatus  = 'success';
+              this.pincodeMessage = `${resolvedCity}, ${resolvedState}`;
+              this.pincodeError   = '';
+            }
           } else {
             this.pincodeStatus  = 'error';
-            this.pincodeMessage = 'Pincode not found. Please enter city & state manually.';
+            this.pincodeMessage = 'Pincode not found. Please check and try again.';
           }
         },
         error: () => {
-          // Fallback: let the user type manually — don't block the form
           this.pincodeStatus  = 'error';
-          this.pincodeMessage = 'Auto-fill unavailable. Please enter city & state manually.';
+          this.pincodeMessage = 'Auto-fill unavailable. Please try again.';
         }
       });
   }
@@ -231,42 +285,61 @@ export class SubmitGrievanceComponent implements OnInit {
     this.imagePublicId = '';
   }
 
-  // ── Submit ────────────────────────────────────────────────────
+  // ── Submit (create or update) ─────────────────────────────────
   onSubmit(): void {
     if (!this.canSubmit) {
-      // Mark all touched to show validation errors
       Object.values(this.form.controls).forEach(c => c.markAsTouched());
       return;
     }
 
+    // Block if pincode resolved to wrong city
+    if (this.pincodeError) {
+      this.submitError = this.pincodeError;
+      return;
+    }
+
     this.isSubmitting = true;
-    this.submitError = '';
+    this.submitError  = '';
 
-    const { name, phoneNumber, street, locality, city, state, department, description } = this.form.value;
+    const { name, phoneNumber, street, locality, pincode, department, description } = this.form.value;
+    // city/state come from disabled controls — use getRawValue()
+    const { city, state } = this.form.getRawValue();
 
-    this.grievanceService.create({
-      name,
-      phoneNumber,
-      street,
-      locality,
-      city,
-      state,
-      department,
-      description,
-      imageUrl: this.imageUrl,
-      imagePublicId: this.imagePublicId
-    }).subscribe({
-      next: () => {
-        this.isSubmitting = false;
-        this.submitSuccess = true;
-        // Navigate to my grievances after 2 seconds
-        setTimeout(() => this.router.navigate(['/dashboard/overview']), 2000);
-      },
-      error: (err) => {
-        this.isSubmitting = false;
-        this.submitError = err.error?.message || 'Something went wrong. Please try again.';
-      }
-    });
+    if (this.isEditMode && this.editGrievance) {
+      // ── UPDATE existing grievance ──────────────────────────
+      this.grievanceService.update(this.editGrievance.id, {
+        name, phoneNumber, street, locality, city, state, department, description
+      }).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.submitSuccess = true;
+          setTimeout(() => this.router.navigate(['/dashboard/my-grievances']), 2000);
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          this.submitError = err.error?.message || 'Update failed. Please try again.';
+        }
+      });
+    } else {
+      // ── CREATE new grievance ───────────────────────────────
+      this.grievanceService.create({
+        name, phoneNumber, street, locality, city, state,
+        pincode,                // now stored on grievance for locality scoping
+        department, description,
+        imageUrl:      this.imageUrl,
+        imagePublicId: this.imagePublicId
+      }).subscribe({
+        next: () => {
+          this.isSubmitting = false;
+          this.submitSuccess = true;
+          setTimeout(() => this.router.navigate(['/dashboard/overview']), 2000);
+        },
+        error: (err) => {
+          this.isSubmitting = false;
+          this.submitError = err.error?.message || 'Something went wrong. Please try again.';
+        }
+      });
+    }
   }
 
   cancel(): void {

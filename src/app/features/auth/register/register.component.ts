@@ -1,11 +1,11 @@
-
 import { Component, ViewEncapsulation, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   FormBuilder, FormGroup, Validators,
   ReactiveFormsModule, AbstractControl, ValidationErrors
 } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { RegisterRequest } from '../../../core/models/user.model';
 import { DEPARTMENTS, DEPARTMENT_VALUES, Department } from '../../../core/constants/departments.constants';
@@ -20,38 +20,30 @@ import { DEPARTMENTS, DEPARTMENT_VALUES, Department } from '../../../core/consta
 })
 export class RegisterComponent implements OnInit {
 
-  registerForm: FormGroup;
-  isLoading = false;
-  errorMessage = '';
+  registerForm!: FormGroup;
+  isLoading      = false;
+  errorMessage   = '';
   successMessage = '';
-  showPassword = false;
+  showPassword        = false;
   showConfirmPassword = false;
+
+  // Pincode lookup state (same logic as submit grievance)
+  pincodeStatus: 'idle' | 'loading' | 'success' | 'error' = 'idle';
+  pincodeMessage = '';
+
   departments: Department[] = DEPARTMENTS;
-  // ── Role options ──────────────────────────────────────────────
-  // value matches backend SignInType enum:
-  //   LocalityMember = 0, GovernmentOfficial = 1
+
   userRoles = [
-    {
-      value: 0,
-      key: 'LocalityMember',
-      label: 'Locality Member',
-      description: 'Report civic issues in your area'
-    },
-    {
-      value: 1,
-      key: 'GovernmentOfficial',
-      label: 'Government Official',
-      description: 'Manage and resolve grievances'
-    }
+    { value: 0, key: 'LocalityMember',     label: 'Locality Member',    description: 'Report civic issues in your area' },
+    { value: 1, key: 'GovernmentOfficial', label: 'Government Official', description: 'Manage and resolve grievances'    }
   ];
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
-  ) {
-    this.registerForm = this.fb.group({});
-  }
+    private router: Router,
+    private http: HttpClient
+  ) {}
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
@@ -60,64 +52,113 @@ export class RegisterComponent implements OnInit {
     }
 
     this.registerForm = this.fb.group({
-      fullName: ['', [Validators.required, Validators.minLength(3)]],
-      email: ['', [Validators.required, Validators.email]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
-      address: ['', [Validators.required, Validators.minLength(10)]],
-      // Default to 0 (LocalityMember)
-      signInType: [0, Validators.required],
-      department: [''],
-      password: ['', [Validators.required, Validators.minLength(8)]],
+      fullName:        ['', [Validators.required, Validators.minLength(3)]],
+      email:           ['', [Validators.required, Validators.email]],
+      phoneNumber:     ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      address:         ['', [Validators.required, Validators.minLength(10)]],
+      signInType:      [0,  Validators.required],
+      department:      [''],
+      pincode:         [''],
+      city:            [''],
+      state:           [''],
+      password:        ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', Validators.required],
-      acceptTerms: [false, Validators.requiredTrue]
+      acceptTerms:     [false, Validators.requiredTrue]
     }, { validators: this.passwordMatchValidator });
+
+    // Toggle validators based on role
     this.signInType!.valueChanges.subscribe((value: number) => {
-      const deptControl = this.registerForm.get('department')!;
+      const deptControl    = this.registerForm.get('department')!;
+      const pincodeControl = this.registerForm.get('pincode')!;
+
       if (value === 1) {
+        // Government Official — needs dept, not pincode
         deptControl.setValidators([Validators.required, this.validDepartmentValidator]);
+        pincodeControl.clearValidators();
+        pincodeControl.setValue('');
+        this.pincodeStatus  = 'idle';
+        this.pincodeMessage = '';
+        this.registerForm.get('city')!.setValue('');
+        this.registerForm.get('state')!.setValue('');
       } else {
+        // Locality Member — needs pincode, not dept
         deptControl.clearValidators();
         deptControl.setValue('');
+        pincodeControl.setValidators([
+          Validators.required,
+          Validators.pattern(/^[0-9]{6}$/)
+        ]);
       }
       deptControl.updateValueAndValidity();
+      pincodeControl.updateValueAndValidity();
     });
-    
+
+    // Watch pincode for auto-fetch city/state
+    this.registerForm.get('pincode')!.valueChanges.subscribe((val: string) => {
+      if (val && /^[0-9]{6}$/.test(val) && !this.isGovernmentOfficial) {
+        this.lookupPincode(val);
+      } else if (!val) {
+        this.pincodeStatus  = 'idle';
+        this.pincodeMessage = '';
+        this.registerForm.get('city')!.setValue('');
+        this.registerForm.get('state')!.setValue('');
+      }
+    });
   }
-validDepartmentValidator(ctrl: AbstractControl): ValidationErrors | null {
+
+  private lookupPincode(pin: string): void {
+    this.pincodeStatus  = 'loading';
+    this.pincodeMessage = 'Looking up pincode...';
+    this.http.get<any>(`/api/location/pincode/${pin}`).subscribe({
+      next: (res) => {
+        if (res?.city && res?.state) {
+          this.registerForm.get('city')!.setValue(res.city);
+          this.registerForm.get('state')!.setValue(res.state);
+          this.pincodeStatus  = 'success';
+          this.pincodeMessage = `${res.city}, ${res.state}`;
+        } else {
+          this.pincodeStatus  = 'error';
+          this.pincodeMessage = 'Pincode not found. Please check.';
+        }
+      },
+      error: () => {
+        this.pincodeStatus  = 'error';
+        this.pincodeMessage = 'Could not verify pincode.';
+      }
+    });
+  }
+
+  validDepartmentValidator(ctrl: AbstractControl): ValidationErrors | null {
     if (!ctrl.value) return null;
     return DEPARTMENT_VALUES.includes(ctrl.value) ? null : { invalidDepartment: true };
   }
 
-  // ── Password match validator ──────────────────────────────────
   passwordMatchValidator(ctrl: AbstractControl): ValidationErrors | null {
-    const pw = ctrl.get('password');
+    const pw  = ctrl.get('password');
     const cpw = ctrl.get('confirmPassword');
     if (!pw || !cpw) return null;
     return pw.value === cpw.value ? null : { passwordMismatch: true };
   }
 
-  // ── Getters ───────────────────────────────────────────────────
-  get fullName() { return this.registerForm.get('fullName'); }
-  get email() { return this.registerForm.get('email'); }
-  get phoneNumber() { return this.registerForm.get('phoneNumber'); }
-  get address() { return this.registerForm.get('address'); }
-  get signInType() { return this.registerForm.get('signInType'); }
+  get fullName()        { return this.registerForm.get('fullName'); }
+  get email()           { return this.registerForm.get('email'); }
+  get phoneNumber()     { return this.registerForm.get('phoneNumber'); }
+  get address()         { return this.registerForm.get('address'); }
+  get signInType()      { return this.registerForm.get('signInType'); }
   get department()      { return this.registerForm.get('department'); }
-  get password() { return this.registerForm.get('password'); }
+  get pincode()         { return this.registerForm.get('pincode'); }
+  get password()        { return this.registerForm.get('password'); }
   get confirmPassword() { return this.registerForm.get('confirmPassword'); }
-  get acceptTerms() { return this.registerForm.get('acceptTerms'); }
-  get passwordsMatch(): boolean { return !this.registerForm.hasError('passwordMismatch'); }
+  get acceptTerms()     { return this.registerForm.get('acceptTerms'); }
 
-  get isGovernmentOfficial(): boolean {
-    return this.signInType?.value === 1;
-  }
+  get isGovernmentOfficial(): boolean { return this.signInType?.value === 1; }
+  get passwordsMatch(): boolean       { return !this.registerForm.hasError('passwordMismatch'); }
 
-  togglePasswordVisibility(): void { this.showPassword = !this.showPassword; }
+  togglePasswordVisibility():        void { this.showPassword        = !this.showPassword; }
   toggleConfirmPasswordVisibility(): void { this.showConfirmPassword = !this.showConfirmPassword; }
 
-  // ── Submit ────────────────────────────────────────────────────
   onSubmit(): void {
-    this.errorMessage = '';
+    this.errorMessage   = '';
     this.successMessage = '';
 
     if (this.registerForm.invalid) {
@@ -127,20 +168,26 @@ validDepartmentValidator(ctrl: AbstractControl): ValidationErrors | null {
       return;
     }
 
+    // Extra check: locality member must have valid pincode resolved
+    if (!this.isGovernmentOfficial && this.pincodeStatus !== 'success') {
+      this.errorMessage = 'Please enter a valid 6-digit pincode to continue.';
+      return;
+    }
+
     this.isLoading = true;
 
-    // ── KEY FIX ────────────────────────────────────────────────
-    // Old code sent: { role: 'LocalityMember' }  ← string, wrong field name
-    // Fix sends:    { signInType: 0 }             ← integer matching C# enum
     const payload: RegisterRequest = {
-      name: this.fullName?.value,
-      email: this.email?.value,
-      phoneNumber: this.phoneNumber?.value,
-      address: this.address?.value,
-      password: this.password?.value,
+      name:            this.fullName?.value,
+      email:           this.email?.value,
+      phoneNumber:     this.phoneNumber?.value,
+      address:         this.address?.value,
+      password:        this.password?.value,
       confirmPassword: this.confirmPassword?.value,
-      signInType: this.signInType?.value  , // 0 or 1
-      department:      this.isGovernmentOfficial ? this.department?.value : undefined
+      signInType:      this.signInType?.value,
+      department:      this.isGovernmentOfficial ? this.department?.value  : undefined,
+      pincode:         !this.isGovernmentOfficial ? this.pincode?.value    : undefined,
+      city:            !this.isGovernmentOfficial ? this.registerForm.get('city')?.value  : undefined,
+      state:           !this.isGovernmentOfficial ? this.registerForm.get('state')?.value : undefined,
     };
 
     this.authService.register(payload).subscribe({
@@ -156,6 +203,8 @@ validDepartmentValidator(ctrl: AbstractControl): ValidationErrors | null {
     });
   }
 
-  navigateToHome(): void { this.router.navigate(['/']); }
+  navigateToHome():  void { this.router.navigate(['/']); }
   navigateToLogin(): void { this.router.navigate(['/auth/login']); }
 }
+
+

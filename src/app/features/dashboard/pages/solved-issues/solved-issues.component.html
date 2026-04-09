@@ -1,1 +1,303 @@
-<p>solved-issues works!</p>
+<!-- ─── Loading skeletons ────────────────────────────────────── -->
+<div class="si-loading" *ngIf="isLoading">
+  <div class="sk-grid">
+    <div class="sk-card" *ngFor="let x of [1,2,3,4,5,6]">
+      <div class="sk-bar"></div>
+      <div class="sk-body">
+        <div class="sk-line sk-line--short"></div>
+        <div class="sk-line"></div>
+        <div class="sk-line sk-line--long"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Error ────────────────────────────────────────────────── -->
+<div class="si-error" *ngIf="errorMessage && !isLoading">
+  <i class="fas fa-exclamation-circle"></i>
+  <span>{{ errorMessage }}</span>
+  <button (click)="load()"><i class="fas fa-redo"></i> Retry</button>
+</div>
+
+<!-- ─── Main ─────────────────────────────────────────────────── -->
+<div class="si-wrap" *ngIf="!isLoading && !errorMessage">
+
+  <!-- ── Hero ────────────────────────────────────────────────── -->
+  <div class="si-hero">
+    <div class="si-hero-text">
+      <h1 class="si-title">
+        <div class="si-title-icon"><i class="fas fa-check"></i></div>
+        Resolved Issues
+      </h1>
+      <p class="si-sub">
+        These complaints were heard and fixed.
+        Proof that civic action works.
+      </p>
+    </div>
+    <div class="si-hero-chips">
+      <div class="hero-chip">
+        <i class="fas fa-check-double"></i>
+        <span>{{ totalRecords }}</span>
+        <small>Total Resolved</small>
+      </div>
+      <div class="hero-chip hero-chip--gold">
+        <i class="fas fa-calendar-check"></i>
+        <span>{{ thisMonthCount }}</span>
+        <small>This Month</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toolbar ──────────────────────────────────────────────── -->
+  <div class="si-toolbar">
+    <div class="si-search-wrap">
+      <i class="fas fa-search"></i>
+      <input class="si-search" type="text"
+        placeholder="Search resolved issues..."
+        [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+      <button *ngIf="searchQuery" (click)="searchQuery=''; onSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <select class="si-select" [(ngModel)]="selectedDept" (ngModelChange)="onDeptChange()">
+      <option value="">All Departments</option>
+      <option *ngFor="let d of departments" [value]="d.value">{{ d.label }}</option>
+    </select>
+    <div class="si-sort">
+      <button class="sort-btn"
+        *ngFor="let s of sortOptions"
+        [class.sort-btn--active]="sortBy === s.key"
+        (click)="onSort(s.key)">
+        <i class="fas {{ s.icon }}"></i>{{ s.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Stat Row ─────────────────────────────────────────────── -->
+  <div class="si-stat-row">
+    <div class="stat-card stat-card--green">
+      <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+      <div>
+        <div class="stat-num">{{ totalRecords }}</div>
+        <div class="stat-lbl">Total Solved</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--blue">
+      <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+      <div>
+        <div class="stat-num">{{ thisMonthCount }}</div>
+        <div class="stat-lbl">Solved This Month</div>
+      </div>
+    </div>
+    <div class="stat-card stat-card--amber">
+      <div class="stat-icon"><i class="fas fa-medal"></i></div>
+      <div>
+        <div class="stat-num stat-num--dept">{{ topDept || '—' }}</div>
+        <div class="stat-lbl">Most Active Dept</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Empty ────────────────────────────────────────────────── -->
+  <div class="si-empty" *ngIf="filtered.length === 0">
+    <div class="empty-icon"><i class="fas fa-check-circle"></i></div>
+    <h3>No resolved issues found</h3>
+    <p>{{ searchQuery ? 'Try different keywords' : 'No resolved issues for these filters' }}</p>
+  </div>
+
+  <!-- ── Grid ─────────────────────────────────────────────────── -->
+  <div class="si-grid" *ngIf="filtered.length > 0">
+    <div class="si-card"
+      *ngFor="let g of filtered; trackBy: trackById; let i = index"
+      [style.animation-delay]="i * 55 + 'ms'"
+      (click)="openModal(g)">
+
+      <!-- Dept-coloured accent bar -->
+      <div class="card-accent" [style.background]="'linear-gradient(90deg,' + deptColor(g.department) + ', ' + deptColor(g.department) + '99)'"></div>
+
+      <!-- Resolved corner ribbon -->
+      <div class="resolved-ribbon"><i class="fas fa-check"></i></div>
+
+      <!-- Top row -->
+      <div class="card-top">
+        <span class="dept-badge"
+          [style.background]="deptColor(g.department) + '14'"
+          [style.color]="deptColor(g.department)"
+          [style.border-color]="deptColor(g.department) + '30'">
+          <i class="fas {{ deptIcon(g.department) }}"></i>
+          {{ g.department }}
+        </span>
+        <span class="resolved-badge">
+          <i class="fas fa-check"></i> Resolved
+        </span>
+      </div>
+
+      <!-- Description -->
+      <p class="card-desc">
+        {{ g.description.length > 90 ? (g.description | slice:0:90) + '…' : g.description }}
+      </p>
+
+      <!-- Location -->
+      <div class="card-loc">
+        <i class="fas fa-map-marker-alt"></i>
+        {{ g.locality }}, {{ g.city }}
+      </div>
+
+      <!-- Footer -->
+      <div class="card-foot">
+        <div class="card-upvotes">
+          <i class="fas fa-thumbs-up"></i>
+          {{ g.upvotes }} upvotes
+        </div>
+        <div class="card-date">
+          <div class="date-check"><i class="fas fa-check"></i></div>
+          Resolved {{ formatDate(g.updatedAt ?? g.createdAt) }}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Pagination ───────────────────────────────────────────── -->
+  <div class="si-pagination" *ngIf="totalPages > 1">
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(1)">
+      <i class="fas fa-angle-double-left"></i>
+    </button>
+    <button class="pg-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="pg-btn" *ngFor="let p of pageNumbers"
+      [class.pg-active]="p === currentPage"
+      (click)="changePage(p)">{{ p }}</button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages" (click)="changePage(totalPages)">
+      <i class="fas fa-angle-double-right"></i>
+    </button>
+    <span class="pg-info">Page {{ currentPage }} of {{ totalPages }}</span>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" [class.modal-overlay--open]="modalOpen" (click)="closeModal()"></div>
+
+<div class="modal-box" [class.modal-box--open]="modalOpen"
+  *ngIf="selectedGrievance" (click)="$event.stopPropagation()">
+
+  <!-- Header -->
+  <div class="modal-head">
+    <div class="modal-head-left">
+      <div class="modal-dept-icon">
+        <i class="fas {{ deptIcon(selectedGrievance.department) }}"
+          [style.color]="deptColor(selectedGrievance.department)"></i>
+      </div>
+      <div>
+        <div class="modal-dept-name">{{ selectedGrievance.department }}</div>
+        <div class="modal-head-meta">
+          <span><i class="fas fa-user"></i> {{ selectedGrievance.userName }}</span>
+          <span><i class="fas fa-calendar-alt"></i> Filed {{ formatDate(selectedGrievance.createdAt) }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-head-right">
+      <div class="modal-res-chip">
+        <i class="fas fa-check-circle"></i> Resolved
+      </div>
+      <button class="modal-close" (click)="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Timeline — all three nodes done -->
+  <div class="modal-timeline">
+    <div class="ptl-step ptl-step--done">
+      <div class="ptl-icon"><i class="fas fa-file-alt"></i></div>
+      <div class="ptl-label">Filed</div>
+      <div class="ptl-date">{{ formatDate(selectedGrievance.createdAt) }}</div>
+    </div>
+    <div class="ptl-step ptl-step--done">
+      <div class="ptl-icon"><i class="fas fa-cog"></i></div>
+      <div class="ptl-label">In Progress</div>
+      <div class="ptl-date">—</div>
+    </div>
+    <div class="ptl-step ptl-step--done ptl-step--resolved">
+      <div class="ptl-icon"><i class="fas fa-check"></i></div>
+      <div class="ptl-label">Resolved</div>
+      <div class="ptl-date">{{ formatDate(selectedGrievance.updatedAt ?? selectedGrievance.createdAt) }}</div>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="modal-body">
+
+    <!-- Left column -->
+    <div class="modal-col">
+      <div class="msec">
+        <div class="msec-label">Description</div>
+        <p class="msec-desc">{{ selectedGrievance.description }}</p>
+      </div>
+
+      <div class="msec">
+        <div class="msec-label">Location</div>
+        <div class="loc-grid">
+          <div class="loc-cell"><span class="lk">Street</span><span class="lv">{{ selectedGrievance.street }}</span></div>
+          <div class="loc-cell"><span class="lk">Locality</span><span class="lv">{{ selectedGrievance.locality }}</span></div>
+          <div class="loc-cell"><span class="lk">City</span><span class="lv">{{ selectedGrievance.city }}</span></div>
+          <div class="loc-cell"><span class="lk">State</span><span class="lv">{{ selectedGrievance.state }}</span></div>
+        </div>
+      </div>
+
+      <div class="msec">
+        <div class="msec-label">Details</div>
+        <div class="meta-chips">
+          <div class="mc"><i class="fas fa-flag"></i>{{ selectedGrievance.priority }} priority</div>
+          <div class="mc"><i class="fas fa-thumbs-up"></i>{{ selectedGrievance.upvotes }} upvotes</div>
+          <div class="mc"><i class="fas fa-phone"></i>{{ selectedGrievance.phoneNumber }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="modal-col">
+
+      <!-- Resolution highlight box -->
+      <div class="resolution-box">
+        <div class="res-box-header">
+          <i class="fas fa-check-circle"></i>
+          Resolution Details
+        </div>
+        <div class="res-box-date">
+          <div class="res-check-icon"><i class="fas fa-check"></i></div>
+          {{ formatDate(selectedGrievance.updatedAt ?? selectedGrievance.createdAt) }}
+        </div>
+        <div class="res-box-days">
+          Resolved in <strong>{{ daysToResolve(selectedGrievance) }} day{{ daysToResolve(selectedGrievance) === 1 ? '' : 's' }}</strong>
+          from filing date
+        </div>
+      </div>
+
+      <!-- Photo evidence -->
+      <div class="msec" *ngIf="selectedGrievance.imageUrl">
+        <div class="msec-label">Photo Evidence</div>
+        <img [src]="selectedGrievance.imageUrl" alt="Evidence" class="modal-img" />
+      </div>
+      <div class="modal-no-photo" *ngIf="!selectedGrievance.imageUrl">
+        <i class="fas fa-image"></i>
+        <span>No photo attached</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Footer — read only -->
+  <div class="modal-footer-readonly">
+    <i class="fas fa-lock"></i>
+    This grievance is resolved — no further actions available
+  </div>
+
+</div>

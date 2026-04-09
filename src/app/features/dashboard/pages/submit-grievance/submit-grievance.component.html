@@ -3,10 +3,13 @@
   <div class="success-icon">
     <i class="fas fa-check-circle"></i>
   </div>
-  <h2 class="success-title">Grievance Submitted!</h2>
+  <h2 class="success-title">
+    {{ isEditMode ? 'Grievance Updated!' : 'Grievance Submitted!' }}
+  </h2>
   <p class="success-sub">
-    Your grievance has been submitted successfully and is now <strong>Pending</strong> review.
-    Redirecting to My Grievances...
+    {{ isEditMode
+        ? 'Your grievance has been updated successfully. Redirecting to My Grievances...'
+        : 'Your grievance has been submitted successfully and is now Pending review. Redirecting to overview...' }}
   </p>
 </div>
 
@@ -16,9 +19,13 @@
   <!-- Page Header -->
   <div class="page-header">
     <div>
-      <h1 class="page-title">Submit a Grievance</h1>
+      <h1 class="page-title">
+        {{ isEditMode ? 'Edit Grievance' : 'Submit a Grievance' }}
+      </h1>
       <p class="page-sub">
-        Report a civic issue in your area. It will be tracked and resolved by the concerned department.
+        {{ isEditMode
+            ? 'Update your grievance details below. Only pending grievances can be edited.'
+            : 'Report a civic issue in your area. It will be tracked and resolved by the concerned department.' }}
       </p>
     </div>
   </div>
@@ -144,9 +151,14 @@
                 <span class="field-hint field-hint--loading" *ngIf="pincodeStatus === 'loading'">
                   <i class="fas fa-spinner fa-spin"></i> Looking up pincode...
                 </span>
-                <span class="field-hint field-hint--error" *ngIf="pincodeStatus === 'error'">
+                <span class="field-hint field-hint--error" *ngIf="pincodeStatus === 'error' && !pincodeError">
                   <i class="fas fa-exclamation-circle"></i> {{ pincodeMessage }}
                 </span>
+                <!-- City mismatch error — shown prominently -->
+                <div class="pincode-city-error" *ngIf="pincodeError">
+                  <i class="fas fa-ban"></i>
+                  {{ pincodeError }}
+                </div>
                 <span class="field-error" *ngIf="isInvalid('pincode') && pincodeStatus === 'idle'">
                   {{ getError('pincode') }}
                 </span>
@@ -363,10 +375,12 @@
             [disabled]="!canSubmit"
           >
             <span *ngIf="!isSubmitting">
-              <i class="fas fa-paper-plane"></i> Submit Grievance
+              <i class="fas fa-paper-plane"></i>
+              {{ isEditMode ? 'Update Grievance' : 'Submit Grievance' }}
             </span>
             <span *ngIf="isSubmitting" class="btn-loading">
-              <i class="fas fa-spinner fa-spin"></i> Submitting...
+              <i class="fas fa-spinner fa-spin"></i>
+              {{ isEditMode ? 'Updating...' : 'Submitting...' }}
             </span>
           </button>
         </div>
@@ -424,7 +438,7 @@
                   class="dept-pill"
                   *ngIf="form.get('department')?.value"
                 >
-                  <i class="fas {{ deptConfig[form.get('department')?.value].icon }}"></i>
+                  <i class="fas {{ form.get('department')?.value ? deptConfig[form.get('department')!.value].icon : '' }}"></i>
                   {{ form.get('department')?.value }}
                 </span>
                 <span *ngIf="!form.get('department')?.value">—</span>

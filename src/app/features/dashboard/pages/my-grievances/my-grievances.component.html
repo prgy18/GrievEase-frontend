@@ -1,1 +1,400 @@
-<p>my-grievances works!</p>
+<!-- ─── Loading ───────────────────────────────────────────────── -->
+<div class="mg-loading" *ngIf="isLoading">
+  <div class="mg-spinner">
+    <div class="spinner-ring"></div>
+    <div class="spinner-ring ring-2"></div>
+  </div>
+  <p class="mg-loading-text">Fetching your grievances...</p>
+</div>
+
+<!-- ─── Error ─────────────────────────────────────────────────── -->
+<div class="mg-error" *ngIf="errorMessage && !isLoading">
+  <i class="fas fa-exclamation-circle"></i>
+  <span>{{ errorMessage }}</span>
+  <button class="mg-retry" (click)="loadGrievances()">
+    <i class="fas fa-redo"></i> Retry
+  </button>
+</div>
+
+<!-- ─── Main ───────────────────────────────────────────────────── -->
+<div class="mg-wrap" *ngIf="!isLoading && !errorMessage">
+
+  <!-- Header -->
+  <div class="mg-header">
+    <div>
+      <h1 class="mg-title">My Grievances</h1>
+      <p class="mg-sub">Track every complaint from submission to resolution</p>
+    </div>
+    <button class="mg-new-btn" (click)="navigateToSubmit()">
+      <i class="fas fa-plus"></i> New Grievance
+    </button>
+  </div>
+
+  <!-- Summary Strip -->
+  <div class="mg-summary-strip">
+    <div class="summary-chip chip-total">
+      <i class="fas fa-layer-group chip-icon"></i>
+      <span class="chip-num">{{ countFor('all') }}</span>
+      <span class="chip-lbl">Total</span>
+    </div>
+    <div class="summary-chip chip-pending">
+      <i class="fas fa-clock chip-icon"></i>
+      <span class="chip-num">{{ countFor('pending') }}</span>
+      <span class="chip-lbl">Pending</span>
+    </div>
+    <div class="summary-chip chip-process">
+      <i class="fas fa-cog chip-icon"></i>
+      <span class="chip-num">{{ countFor('in process') }}</span>
+      <span class="chip-lbl">In Process</span>
+    </div>
+    <!-- Awaiting Approval chip -->
+    <div class="summary-chip chip-awaiting">
+      <i class="fas fa-hourglass-half chip-icon"></i>
+      <span class="chip-num">{{ countFor('awaiting approval') }}</span>
+      <span class="chip-lbl">Awaiting</span>
+    </div>
+    <div class="summary-chip chip-solved">
+      <i class="fas fa-check-circle chip-icon"></i>
+      <span class="chip-num">{{ countFor('solved') }}</span>
+      <span class="chip-lbl">Solved</span>
+    </div>
+    <div class="summary-rate" *ngIf="countFor('all') > 0">
+      <span class="rate-label">Resolution rate</span>
+      <div class="rate-track">
+        <div class="rate-fill"
+          [style.width.%]="(countFor('solved') / countFor('all')) * 100">
+        </div>
+      </div>
+      <span class="rate-pct">
+        {{ ((countFor('solved') / countFor('all')) * 100) | number:'1.0-0' }}%
+      </span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="mg-controls">
+    <div class="mg-tabs">
+      <button class="mg-tab" *ngFor="let tab of tabs"
+        [class.mg-tab--active]="activeFilter === tab.key"
+        (click)="setFilter(tab.key)">
+        <i class="fas {{ tab.icon }}"></i>
+        <span>{{ tab.label }}</span>
+        <span class="tab-count">{{ countFor(tab.key) }}</span>
+      </button>
+    </div>
+    <div class="mg-search-wrap">
+      <i class="fas fa-search mg-search-icon"></i>
+      <input class="mg-search" type="text"
+        placeholder="Search description, dept, locality..."
+        [(ngModel)]="searchQuery" (ngModelChange)="onSearch()" />
+      <button class="mg-search-clear" *ngIf="searchQuery"
+        (click)="searchQuery=''; onSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="mg-empty" *ngIf="filtered.length === 0">
+    <div class="empty-illustration"><i class="fas fa-clipboard"></i></div>
+    <h3 class="empty-title">
+      {{ searchQuery ? 'No results found' : 'No grievances here' }}
+    </h3>
+    <p class="empty-sub">
+      {{ searchQuery ? 'Try a different search term'
+        : activeFilter === 'all' ? 'Submit your first grievance to get started'
+        : 'You have no ' + activeFilter + ' grievances' }}
+    </p>
+    <button class="mg-new-btn" *ngIf="!searchQuery && activeFilter === 'all'"
+      (click)="navigateToSubmit()">
+      <i class="fas fa-plus"></i> Submit Grievance
+    </button>
+  </div>
+
+  <!-- ─── Cards Grid ──────────────────────────────────────────── -->
+  <div class="mg-grid" *ngIf="filtered.length > 0">
+    <div class="mg-card"
+      *ngFor="let g of filtered; let i = index"
+      [class.mg-card--pending]="g.status === 'pending'"
+      [class.mg-card--process]="g.status === 'in process'"
+      [class.mg-card--solved]="g.status === 'solved'"
+      [class.mg-card--selected]="selectedGrievance?.id === g.id && panelOpen"
+      [style.animation-delay]="i * 60 + 'ms'"
+      (click)="openPanel(g)">
+
+      <div class="card-accent"></div>
+
+      <div class="card-head">
+        <div class="card-dept-badge">
+          <i class="fas {{ deptIcon(g.department) }}"></i>
+          {{ g.department }}
+        </div>
+        <span class="card-days">{{ daysAgo(g.createdAt) }}</span>
+      </div>
+
+      <p class="card-desc">
+        {{ g.description.length > 90
+            ? (g.description | slice:0:90) + '…'
+            : g.description }}
+      </p>
+
+      <div class="card-location">
+        <i class="fas fa-map-marker-alt"></i>
+        {{ g.locality }}, {{ g.city }}
+      </div>
+
+      <!-- Mini Timeline -->
+      <div class="card-timeline">
+        <div class="tl-track">
+          <div class="tl-fill"
+            [class.tl-fill--half]="statusStep(g.status) === 1"
+            [class.tl-fill--full]="statusStep(g.status) === 2"></div>
+        </div>
+        <div class="tl-nodes">
+          <div class="tl-node" [class.tl-node--done]="statusStep(g.status) >= 0">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <div class="tl-node"
+            [class.tl-node--done]="statusStep(g.status) >= 1"
+            [class.tl-node--active]="statusStep(g.status) === 1">
+            <i class="fas fa-cog"></i>
+          </div>
+          <div class="tl-node" [class.tl-node--done]="statusStep(g.status) >= 2">
+            <i class="fas fa-check"></i>
+          </div>
+        </div>
+        <div class="tl-labels">
+          <span>Filed</span><span>In Progress</span><span>Resolved</span>
+        </div>
+      </div>
+
+      <!-- Card Footer -->
+      <div class="card-foot">
+        <div class="card-upvotes">
+          <i class="fas fa-thumbs-up"></i> {{ g.upvotes }}
+        </div>
+
+        <span class="status-pill"
+          [class.pill-pending]="g.status === 'pending'"
+          [class.pill-process]="g.status === 'in process'"
+          [class.pill-solved]="g.status === 'solved'">
+          <span class="pill-dot"></span>{{ g.status }}
+        </span>
+
+        <!-- ── Edit icon on card ─────────────────────────────── -->
+        <button class="card-action-btn card-edit-btn"
+          (click)="onEditClick(g, $event)"
+          [title]="canEdit(g) ? 'Edit grievance' : 'Editing not allowed'">
+          <i class="fas fa-pencil-alt"></i>
+        </button>
+
+        <!-- ── Delete with inline confirm ───────────────────── -->
+        <ng-container *ngIf="canDelete(g)">
+          <div class="delete-confirm" *ngIf="deleteTargetId === g.id"
+            (click)="$event.stopPropagation()">
+            <span>Delete?</span>
+            <button class="del-yes" [disabled]="isDeleting"
+              (click)="executeDelete(g.id, $event)">
+              <i class="fas fa-check"></i>
+            </button>
+            <button class="del-no" (click)="cancelDelete($event)">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <button class="card-action-btn card-delete-btn"
+            *ngIf="deleteTargetId !== g.id"
+            (click)="confirmDelete(g.id, $event)" title="Delete">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="mg-pagination" *ngIf="totalPages > 1">
+    <button class="pg-btn" [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <button class="pg-btn" *ngFor="let p of pageNumbers"
+      [class.pg-active]="p === currentPage" (click)="changePage(p)">
+      {{ p }}
+    </button>
+    <button class="pg-btn" [disabled]="currentPage === totalPages"
+      (click)="changePage(currentPage + 1)">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CENTERED MODAL
+════════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay"
+  [class.modal-overlay--open]="panelOpen"
+  (click)="closePanel()">
+</div>
+
+<div class="modal-box"
+  [class.modal-box--open]="panelOpen"
+  *ngIf="selectedGrievance"
+  (click)="$event.stopPropagation()">
+
+  <!-- Modal Header -->
+  <div class="modal-head">
+    <div class="modal-head-left">
+      <div class="modal-dept-icon">
+        <i class="fas {{ deptIcon(selectedGrievance.department) }}"></i>
+      </div>
+      <div>
+        <div class="modal-dept-name">{{ selectedGrievance.department }}</div>
+        <div class="modal-date">Filed {{ formatDate(selectedGrievance.createdAt) }}</div>
+      </div>
+    </div>
+    <div class="modal-head-actions">
+      <!-- Close button only in header now — edit/delete moved to footer -->
+      <button class="modal-close" (click)="closePanel()" title="Close">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Edit not allowed toast (inside modal) -->
+  <div class="edit-not-allowed-banner" *ngIf="showEditNotAllowed">
+    <i class="fas fa-lock"></i>
+    Editing is only allowed for <strong>Pending</strong> grievances.
+    This grievance is <strong>{{ selectedGrievance.status }}</strong>.
+  </div>
+
+  <!-- Status Timeline -->
+  <div class="modal-timeline">
+    <div class="ptl-step"
+      [class.ptl-step--done]="statusStep(selectedGrievance.status) >= 0">
+      <div class="ptl-icon"><i class="fas fa-file-alt"></i></div>
+      <div class="ptl-line"
+        [class.ptl-line--active]="statusStep(selectedGrievance.status) >= 1"></div>
+      <div class="ptl-label">Filed</div>
+      <div class="ptl-date">{{ formatDate(selectedGrievance.createdAt) }}</div>
+    </div>
+    <div class="ptl-step"
+      [class.ptl-step--done]="statusStep(selectedGrievance.status) >= 1"
+      [class.ptl-step--active]="statusStep(selectedGrievance.status) === 1">
+      <div class="ptl-icon"><i class="fas fa-cog"></i></div>
+      <div class="ptl-line"
+        [class.ptl-line--active]="statusStep(selectedGrievance.status) >= 2"></div>
+      <div class="ptl-label">In Progress</div>
+      <div class="ptl-date">
+        {{ statusStep(selectedGrievance.status) >= 1
+            ? formatDate(selectedGrievance.updatedAt) : '—' }}
+      </div>
+    </div>
+    <div class="ptl-step"
+      [class.ptl-step--done]="statusStep(selectedGrievance.status) >= 2">
+      <div class="ptl-icon"><i class="fas fa-check-circle"></i></div>
+      <div class="ptl-line ptl-line--end"></div>
+      <div class="ptl-label">Resolved</div>
+      <div class="ptl-date">
+        {{ selectedGrievance.solvedOn
+            ? formatDate(selectedGrievance.solvedOn) : '—' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Resolution badge -->
+  <div class="modal-resolution-badge"
+    *ngIf="resolutionDays(selectedGrievance) !== null">
+    <i class="fas fa-clock"></i>
+    Resolved in {{ resolutionDays(selectedGrievance) }} day(s)
+  </div>
+
+  <!-- Modal Body — two columns -->
+  <div class="modal-body">
+
+    <!-- Left col -->
+    <div class="modal-col">
+      <div class="modal-section">
+        <div class="modal-section-label">Description</div>
+        <p class="modal-desc">{{ selectedGrievance.description }}</p>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Location</div>
+        <div class="modal-location-grid">
+          <div class="pl-item"><span class="pl-key">Street</span><span class="pl-val">{{ selectedGrievance.street }}</span></div>
+          <div class="pl-item"><span class="pl-key">Locality</span><span class="pl-val">{{ selectedGrievance.locality }}</span></div>
+          <div class="pl-item"><span class="pl-key">City</span><span class="pl-val">{{ selectedGrievance.city }}</span></div>
+          <div class="pl-item"><span class="pl-key">State</span><span class="pl-val">{{ selectedGrievance.state }}</span></div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-label">Details</div>
+        <div class="modal-meta-grid">
+          <div class="pm-item"><i class="fas fa-thumbs-up"></i><span>{{ selectedGrievance.upvotes }} upvotes</span></div>
+          <div class="pm-item"><i class="fas fa-flag"></i><span>Priority: {{ selectedGrievance.priority }}</span></div>
+          <div class="pm-item"><i class="fas fa-phone"></i><span>{{ selectedGrievance.phoneNumber }}</span></div>
+          <div class="pm-item"><i class="fas fa-calendar-alt"></i><span>Updated {{ formatDate(selectedGrievance.updatedAt) }}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right col: photos -->
+    <div class="modal-col">
+      <div class="modal-section" *ngIf="selectedGrievance.imageUrl">
+        <div class="modal-section-label">Photo Evidence</div>
+        <div class="modal-img-wrap">
+          <img [src]="selectedGrievance.imageUrl" alt="Grievance photo" class="modal-img" />
+        </div>
+      </div>
+      <div class="modal-section" *ngIf="selectedGrievance.solvedImageUrl">
+        <div class="modal-section-label">Resolution Photo</div>
+        <div class="modal-img-wrap modal-img-wrap--solved">
+          <div class="solved-badge-overlay">
+            <i class="fas fa-check-circle"></i> Resolved
+          </div>
+          <img [src]="selectedGrievance.solvedImageUrl" alt="Resolution" class="modal-img" />
+        </div>
+      </div>
+      <div class="modal-no-photo"
+        *ngIf="!selectedGrievance.imageUrl && !selectedGrievance.solvedImageUrl">
+        <i class="fas fa-image"></i>
+        <span>No photo attached</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Footer — shown for pending grievances (edit + delete) -->
+  <div class="modal-foot" *ngIf="canDelete(selectedGrievance) || canEdit(selectedGrievance)">
+
+    <!-- Delete confirm state -->
+    <ng-container *ngIf="deleteTargetId === selectedGrievance.id">
+      <span class="modal-del-confirm-text">Are you sure? This cannot be undone.</span>
+      <button class="modal-del-yes" [disabled]="isDeleting"
+        (click)="executeDelete(selectedGrievance.id, $event)">
+        <i class="fas fa-spinner fa-spin" *ngIf="isDeleting"></i>
+        <i class="fas fa-check" *ngIf="!isDeleting"></i>
+        Yes, Delete
+      </button>
+      <button class="modal-del-no" (click)="cancelDelete($event)">Cancel</button>
+    </ng-container>
+
+    <!-- Normal state: Delete (left) + Edit (right) -->
+    <ng-container *ngIf="deleteTargetId !== selectedGrievance.id">
+      <button class="modal-delete-btn" *ngIf="canDelete(selectedGrievance)"
+        (click)="confirmDelete(selectedGrievance.id, $event)">
+        <i class="fas fa-trash-alt"></i> Delete
+      </button>
+      <!-- Edit not allowed banner inline -->
+      <div class="edit-not-allowed-inline" *ngIf="showEditNotAllowed">
+        <i class="fas fa-lock"></i>
+        Only <strong>Pending</strong> grievances can be edited
+      </div>
+      <button class="modal-edit-btn" *ngIf="canEdit(selectedGrievance)"
+        (click)="onEditClick(selectedGrievance, $event)">
+        <i class="fas fa-pencil-alt"></i> Edit Grievance
+      </button>
+    </ng-container>
+
+  </div>
+
+</div>

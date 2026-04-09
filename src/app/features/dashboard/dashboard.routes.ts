@@ -40,14 +40,22 @@ export const DASHBOARD_ROUTES: Routes = [
           import('./pages/solved-issues/solved-issues.component').then(m => m.SolvedIssuesComponent),
         title: 'Solved Issues - GrievEase'
       },
+      {
+        path: 'pending-approval',
+        loadComponent: () =>
+          import('./pages/pending-approval/pending-approval.component').then(m => m.PendingApprovalComponent),
+        title: 'Pending Approval - GrievEase'
+      },
 
-      // ── Official routes ────────────────────────────────────────
+      // ── Shared routes (both roles) ─────────────────────────────
       {
         path: 'all-grievances',
         loadComponent: () =>
           import('./pages/all-grievances/all-grievances.component').then(m => m.AllGrievancesComponent),
         title: 'All Grievances - GrievEase'
       },
+
+      // ── Official routes ────────────────────────────────────────
       {
         path: 'pending',
         loadComponent: () =>
@@ -61,13 +69,19 @@ export const DASHBOARD_ROUTES: Routes = [
         title: 'In Process - GrievEase'
       },
       {
+        path: 'awaiting-approval',
+        loadComponent: () =>
+          import('./pages/awaiting-approval/awaiting-approval.component').then(m => m.AwaitingApprovalComponent),
+        title: 'Awaiting Approval - GrievEase'
+      },
+      {
         path: 'statistics',
         loadComponent: () =>
           import('./pages/statistics/statistics.component').then(m => m.StatisticsComponent),
         title: 'Statistics - GrievEase'
       },
 
-      // ── Shared ────────────────────────────────────────────────
+      // ── Account ────────────────────────────────────────────────
       {
         path: 'profile',
         loadComponent: () =>
